@@ -1,0 +1,26 @@
+{
+    "title": "GetX Test",
+    "patterns": {
+        "facts": {
+            "patHeader": [
+                "hratio",
+                "wratio",
+                "color",
+                "radius",
+                "alignment",
+                "size"
+            ],
+            "rowColHeader": [
+                "crossAxisAlignment",
+                "mainAxisAlignment",
+                "mainAxisSize",
+                "verticalDirection"
+            ]
+        },
+        "clauses": {
+            "mainView": "(_minus ≔ -2) ⋀ ↲(Φ(getxHome))",
+            "details": "↲(Φ(getxDetails))",
+            "paging": "↲(Φ(getxPaging))"
+        }
+    }
+}

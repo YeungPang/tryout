@@ -1,0 +1,109 @@
+{
+    "title": "Xemino",
+    "version": "0.00",
+    "main": "contact",
+    "text": {
+        "title": "Titel",
+        "testText": "There is nothing yet!!!",
+        "contact": "Kontakte",
+        "semicolon": ";",
+        "hash": "#",
+        "colon": ":",
+        "comma": ","
+    },
+    "config": {
+        "contact": {
+            "header": "company;name;address1;address2;address3;tel",
+            "elemList": [
+                "Seveco AG;Yeung Pang;Untermüli 6;5630 Zug;;+41 76 399 2019",
+                "Pangaroo GmbH;Benjamin Pang;Adam-Friedrich-Molz-Gasse 8;2502 Biel;;+41 76 379 2849",
+                "Seveco Software AG;Werner Hofer;Mettlenbachstrasse 29;8617 Mönchaltorf;;+41 79 478 9321",
+                "Seveco Software AG;Reto Leutwyler;Mettlenbachstrasse 29;8617 Mönchaltorf;;+41 79 444 2370",
+                "Seveco AG;Yeung Pang;Untermüli 6;5630 Zug;;+41 76 399 2019",
+                "Pangaroo GmbH;Benjamin Pang;Adam-Friedrich-Molz-Gasse 8;2502 Biel;;+41 76 379 2849",
+                "Seveco Software AG;Werner Hofer;Mettlenbachstrasse 29;8617 Mönchaltorf;;+41 79 478 9321",
+                "Seveco Software AG;Reto Leutwyler;Mettlenbachstrasse 29;8617 Mönchaltorf;;+41 79 444 2370"
+            ]
+        }
+    },
+    "patterns": {
+        "facts": {
+            "patHeader": [
+                "hratio",
+                "wratio",
+                "color",
+                "radius",
+                "alignment",
+                "size"
+            ],
+            "rowColHeader": [
+                "crossAxisAlignment",
+                "mainAxisAlignment",
+                "mainAxisSize",
+                "verticalDirection"
+            ]
+        },
+        "clauses": {
+            "mainView": "setConfig(config, patterns) ⋀ ↲(mainScaffold)",
+            "mainScaffold": [
+                "⋓({_text: ℛ(model, title), _key: key(), _pageController: ℛ(pageController), _pageNoti: 'pageNoti'}) ⋀ ℛ(setResxValue, _pageNoti, 0) ⋀ ",
+                "(_body ≔ mainBody) ⋀ ⋓({'_title': mainAppBar, '_bottomBar': mainBottomBar, '_leading': hamburgerMenu}) ⋀ ↲(scaffoldPat)"
+            ],
+            "mainBottomBar": [
+                "_pageController, _pageNoti, _totalPages | ⋓({_inxIcon: Φ(Icon, {_icon: 'complete', _iconColor: 'btnBlue', ",
+                " _iconSize: 17.0}), _nonInxIcon: Φ(Icon, {_icon: 'incomplete', _iconColor: 'btnBlue', ",
+                " _iconSize: 17.0})}) ⋀ ↲(Φ(PageBar))"
+            ],
+            "scaffoldPat": [
+                "_title, _child, _body, _key, _flexibleSpace, _leading, _bottomBar | ",
+                "mapPat(patHeader, (0.055, Ø, #FFFFFF, Ø, Ø, Ø)) ⋀ (_toolbarHeight ≔ ℛ(appBarHeight))",
+                "↲(Φ(Scaffold, {_bottomNavigationBar: _bottomBar, _appBar: Φ(AppBar), '_body': _body}))"
+            ],
+            "mainAppBar": [
+                "_text, _flexibleSpace | (_child ≔ Φ(Text, {'_text': _text, '_textStyle': ℛ(textStyle, TopicTxtStyle)})) ⋀ ",
+                "(_child ≔ Φ(Center)) ⋀ (_tText ≔ Φ(Expanded)) ⋀ (_iconColor ≔ ℛ(color, 'white')) ⋀ ",
+                "(_icon ≔ 'home') ⋀  (_ic1 ≔ Φ(IconButton)) ⋀ (_icon ≔ 'chat') ⋀ (_ic2 ≔ Φ(IconButton)) ⋀ (_icon ≔ 'settings') ⋀ ",
+                "(_ic3 ≔ Φ(IconButton)) ⋀ (_ic ≔ Φ(Row, {_children: [_ic1, _ic2, _ic3], _mainAxisAlignment: decode(mainAxisAlignment, spaceEvenly)})) ⋀ ",
+                "(_flexibleSpace ≔ Φ(Container, {_decoration: ℛ(appRes, blueGradBD)})) ⋀ (_children ≔ [_tText, _ic]) ⋀ ↲(Φ(Row))"
+            ],
+            "hamburgerMenu": [
+                "↲(Φ(IconButton, {_icon: 'menu', _iconColor: ℛ(color, 'white')}))"
+            ],
+            "mainBody": [
+                "_key, _pageController, _pageNoti, _totalPages | (_p1 ≔ Φ(Container, {_child: page1, _color: ℛ(color, 'lightGreyText')})) ⋀ ",
+                "(_p2 ≔ Φ(Container, {_color: ℛ(color, 'correct')})) ⋀ (_p3 ≔ Φ(Container, {_color: ℛ(color, 'incorrect')})) ⋀ ",
+                "(_children ≔ [_p1, _p2, _p3]) ⋀ (_totalPages ≔ η(_children)) ⋀ ↲(Φ(PageView))"
+            ],
+            "page1": [
+                "mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ (_s ≔ Φ(SizedBox, {'_width': ℛ(wratio, Ø, 0.05)})) ⋀ ",
+                "(_tText ≔ Φ(Text, {'_text': ⊤('contact'), '_textStyle': ℛ(textStyle, Title)})) ⋀ ",
+                "⋓({'_iconColor': 'grey700', '_icon' ≔ 'plus'}) ⋀ (_ic1 ≔ Φ(IconButton)) ⋀ ",
+                "(_icon ≔ 'search') ⋀ (_ic2 ≔ Φ(IconButton)) ⋀ (_icon ≔ 'filter') ⋀ (_ic3 ≔ Φ(IconButton)) ⋀ ",
+                "(_children ≔ [_ic1, _ic2, _ic3]) ⋀ (_r ≔ Φ(Row)) ⋀ (_children ≔ [_tText, _r]) ⋀ ",
+                "(_sb ≔ Φ(Container, {'_width': ℛ(wratio, Ø, 0.95), '_child': Φ(Row)})) ⋀ (_itemRefMap ≔ ℛ(model, main)) ⋀ (_itemRef ≔ _itemRefMap[elemList]) ⋀ ",
+                "↲(Φ(Column, {'_children': [_sb, baseNavi]}))"
+            ],
+            "baseNavi": [
+                "_itemRefMap | ⋓({'_childPattern': 'elemRow', '_childMap': {'_itemRefMap': _itemRefMap}, ",
+                "_prevPage: 'prevContactPage', _nextPage: 'nextContactPage', _resxName: ℛ(model, main)}) ⋀ ",
+                "nextContactPage() ⋀ ⋓({'_child': Φ(Paging), '_alignment': decode(alignment, topCenter), ",
+                "_width: ℛ(swratio, Ø, 1.0), _height: ℛ(hratio, Ø, 0.70)}) ⋀ ↲(Φ(Container))"
+            ],
+            "elemRow": [
+                "_item, _index, _itemRefMap | (_header ≔ _itemRefMap[header]) ⋀ ",
+                "mapPat(_header, _item) ⋀ (_tText ≔ ('Tel' + ⊤(colon) + ' ' + _tel)) ⋀ ⋓({_c: Φ(Text, {'_text': _company, '_textStyle': ℛ(textStyle, Title)}), ",
+                "_n: Φ(Text, {'_text': _name, '_textStyle': ℛ(textStyle, Normal16)}), ",
+                "_a1: Φ(Text, {'_text': _address1, '_textStyle': ℛ(textStyle, Normal16)}), ",
+                "_a2: Φ(Text, {'_text': _address2, '_textStyle': ℛ(textStyle, Normal16)}), ",
+                "_t: Φ(Text, {'_text': _tText, '_textStyle': ℛ(textStyle, Normal16)}), ",
+                "'_height': ℛ(hratio, Ø, 0.0468), '_width': ℛ(swratio, Ø, 0.95)}) ⋀ mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ",
+                "(_ic1 ≔ Φ(IconButton, {'_onTap': createEvent(toTel), '_tapAction': _tel, '_iconColor': 'red', '_icon': 'phone'})) ⋀ (_addr ≔ (_address1 + ⊤(comma) + ' ' + _address2)) ⋀ ",
+                "(_ic2 ≔ Φ(IconButton, {'_onTap': createEvent(addrToMap), '_tapAction': _addr, '_iconColor': 'green', '_icon': 'map'})) ⋀ ",
+                "(_icr ≔ Φ(Row, {_children: [Φ(SizedBox, {'_width': ℛ(swratio, Ø, 0.65)}), _ic1, _ic2]})) ⋀ ",
+                "(_children ≔ [_c, _n, _a1, _a2, _t, _icr]) ⋀  ⋓({'_child': Φ(Row, {'_children': [Φ(SizedBox, {'_width': ℛ(swratio, Ø, 0.05)}), Φ(Column)]}), '_elevation': ℛ(hratio, Ø, 0.01),",
+                "'_cardRadius': ℛ(hratio, Ø, 0.015)}) ⋀ ⋓({'_child': Φ(Card), '_height': ℛ(hratio, Ø, 0.3)}) ⋀ ↲(Φ(Container))"
+            ],
+            "testBox": "(_text ≔ ⊤(testText)) ⋀ (_child ≔ Φ(Text)) ⋀ ƒ(mapPat, (patHeader, (Ø, Ø, #FFFFFF, Ø, topCenter, Ø))) ⋀ ↲(Φ(Container))"
+        }
+    }
+}
