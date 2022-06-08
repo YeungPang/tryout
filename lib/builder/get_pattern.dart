@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:tryout/builder/pattern.dart';
-import 'package:tryout/builder/std_pattern.dart';
-import 'package:tryout/builder/special_pattern.dart';
-import 'package:tryout/builder/tap_list_item.dart';
-import 'package:tryout/resources/basic_resources.dart';
-import 'package:tryout/resources/fonts.dart';
-import 'package:tryout/resources/icons.dart';
-import 'package:tryout/builder/item_search.dart';
+import './pattern.dart';
+import './std_pattern.dart';
+import './special_pattern.dart';
+import './tap_list_item.dart';
+import '../resources/basic_resources.dart';
+import '../resources/fonts.dart';
+import '../resources/icons.dart';
+import './item_search.dart';
 import 'package:json_theme/json_theme.dart';
 
-BoxDecoration getDecoration(String image) {
+BoxDecoration? getDecoration(String image) {
   return ThemeDecoder.decodeBoxDecoration({
     "image": {
       "image": {"assetName": image, "type": "asset"},
@@ -464,7 +464,7 @@ ProcessPattern getInTextFieldPattern(Map<String, dynamic> pmap) {
   List<String> nl = [
     "_autocorrect",
     "_autofocus",
-    "_textEditingController",
+    "_textController",
     "_enabled",
     "_textStyle",
     "_showCursor",
@@ -500,12 +500,12 @@ ProcessPattern getInTextFieldPattern(Map<String, dynamic> pmap) {
   return InTextFieldPattern(map);
 }
 
-ProcessPattern getValueTextPattern(Map<String, dynamic> pmap) {
+ProcessPattern? getValueTextPattern(Map<String, dynamic> pmap) {
   Map<String, dynamic> map = {
     "_notifier": pmap["_notifier"],
     "_converter": pmap["_converter"]
   };
-  ValueNotifier notifier = map["_notifier"];
+  ValueNotifier? notifier = map["_notifier"];
   if (notifier == null) {
     return null;
   }
@@ -738,13 +738,13 @@ ProcessPattern getColorButtonPattern(Map<String, dynamic> pmap) {
   return ColorButtonPattern(map);
 }
 
-ProcessPattern getValueTypeListenerPattern(Map<String, dynamic> pmap) {
+ProcessPattern? getValueTypeListenerPattern(Map<String, dynamic> pmap) {
   Map<String, dynamic> map = {
     "_notifier": pmap["_notifier"],
     "_notifierKey": pmap["_notifierKey"],
     "_child": pmap["_child"]
   };
-  ValueNotifier notifier = map["_notifier"];
+  ValueNotifier? notifier = map["_notifier"];
   if (notifier == null) {
     return null;
   }
@@ -819,6 +819,7 @@ ProcessPattern getIconButtonPattern(Map<String, dynamic> pmap) {
     "_onTap",
     "_tapAction",
     "_key",
+    "_padding",
   ];
   for (String s in nl) {
     dynamic d = pmap[s];
@@ -1014,6 +1015,39 @@ ProcessPattern getTapListItemPattern(Map<String, dynamic> pmap) {
   return TapListItemPattern(map);
 }
 
+ProcessPattern getListTilePattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_key",
+    "_leading",
+    "_title",
+    "_subtitle",
+    "_trailing",
+    "_isThreeLine",
+    "_selected",
+    "_selectedColor",
+    "_selectedTileColor",
+    "_iconColor",
+    "_textColor",
+    "_tileColor",
+    "_contentPadding",
+    "_enabled",
+    "_focusColor",
+    "_hoverColor",
+    "_autofocus",
+    "_onLongPress",
+    "_onTap",
+    "_tapAction",
+  ];
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  return ListTilePattern(map);
+}
+
 ProcessPattern getPagingPattern(Map<String, dynamic> pmap) {
   Map<String, dynamic> map = {};
   List<String> nl = [
@@ -1025,9 +1059,7 @@ ProcessPattern getPagingPattern(Map<String, dynamic> pmap) {
     "_childPattern",
     "_childMap",
     "_refreshController",
-    "_prevPage",
-    "_nextPage",
-    "_resxName",
+    "_dataCache",
   ];
   for (String s in nl) {
     dynamic d = pmap[s];
@@ -1038,10 +1070,77 @@ ProcessPattern getPagingPattern(Map<String, dynamic> pmap) {
   return PagingPattern(map);
 }
 
+ProcessPattern getDividerPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_color",
+    "_endIndent",
+    "_indent",
+    "_height",
+    "_thickness",
+  ];
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  return DividerPattern(map);
+}
+
+ProcessPattern getDropdownButtonPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_type",
+    "_value",
+    "_items",
+    "_cacheName",
+    "_rxName",
+    "_fsmName",
+    "_hint",
+    "_textStyle",
+    "_icon",
+    "_iconSize",
+    "_inMap",
+  ];
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  return DropdownButtonPattern(map);
+}
+
+ProcessPattern getObxOpacityPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {
+    "_child": pmap["_child"],
+    "_rxName": pmap["_rxName"]
+  };
+  return ObxOpacityPattern(map);
+}
+
+ProcessPattern getProgressTextPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {
+    "_text": pmap["_text"],
+    "_textStyle": pmap["_textStyle"],
+  };
+  return ProgressTextPattern(map);
+}
+
+ProcessPattern getTabColumnPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {
+    "_tabs": pmap["_tabs"],
+    "_children": pmap["_children"],
+  };
+  return TabColumnPattern(map);
+}
+
 final Map<String, Function> getPrimePattern = {
   "Align": getAlignPattern,
   "AppBar": getAppBarPattern,
   "Badge": getBadgePattern,
+  "Divider": getDividerPattern,
   "Card": getCardPattern,
   "Center": getCenterPattern,
   "ClipRRect": getClipRRectPattern,
@@ -1051,6 +1150,7 @@ final Map<String, Function> getPrimePattern = {
   "DottedBorder": getDottedBorderPattern,
   "Draggable": getDraggablePattern,
   "DragTarget": getDragTargetPattern,
+  "DropdownButton": getDropdownButtonPattern,
   "Expanded": getExpandedPattern,
   "FittedBox": getFittedBoxPattern,
   "Flexible": getFlexiblePattern,
@@ -1063,8 +1163,10 @@ final Map<String, Function> getPrimePattern = {
   "IndexedStack": getIndexedStackPattern,
   "InteractiveViewer": getInteractiveViewerPattern,
   "InTextField": getInTextFieldPattern,
+  "ListTile": getListTilePattern,
   "ListView": getListViewPattern,
   "Obx": getObxPattern,
+  "ObxOpacity": getObxOpacityPattern,
   "ObxProcess": getObxProcessPattern,
   "Opacity": getOpacityPattern,
   "OverflowBox": getOverflowBoxPatternn,
@@ -1073,6 +1175,7 @@ final Map<String, Function> getPrimePattern = {
   "PageView": getPageViewPattern,
   "PageBar": getPageBarPattern,
   "Positioned": getPositionedPattern,
+  "ProgressText": getProgressTextPattern,
   "RichText": getRichTextPattern,
   "Row": getRowPattern,
   "Scaffold": getScaffolPattern,
@@ -1083,6 +1186,7 @@ final Map<String, Function> getPrimePattern = {
   "SizedBoxExpand": getSizedBoxExpandPattern,
   "Stack": getStackPattern,
   "SVGAsset": getSVGAssetPattern,
+  "TabColumn": getTabColumnPattern,
   "TapItem": getTapItemPattern,
   "TapListItem": getTapListItemPattern,
   "Text": getTextPattern,

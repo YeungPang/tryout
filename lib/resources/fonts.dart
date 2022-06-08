@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tryout/model/locator.dart';
+import '../model/locator.dart';
 
 final fontScale = model.fontScale;
 
@@ -38,6 +38,26 @@ final defaultPaddingHorizontal = 12.0 * model.sizeScale;
 
 const String fontNameAN = 'Lato';
 
+TextStyle getTextStyle(Color color, double size, int w) {
+  double s = size * fontScale;
+  FontWeight fw = (w == 300)
+      ? w300
+      : ((w == 400)
+          ? w400
+          : ((w == 500)
+              ? w500
+              : ((w == 600) ? w600 : ((w == 700) ? w700 : w900))));
+  switch (w) {
+    case 300:
+  }
+  return TextStyle(
+    fontFamily: fontNameAN,
+    fontSize: s,
+    fontWeight: fw,
+    color: color,
+  );
+}
+
 final TextStyle appBarTextStyle = TextStyle(
   fontFamily: fontNameAN,
   fontWeight: w300,
@@ -49,6 +69,13 @@ final TextStyle titleTextStyle = TextStyle(
   fontFamily: fontNameAN,
   fontWeight: w500,
   fontSize: fsize22,
+  color: textColorDark,
+);
+
+final TextStyle boldTextStyle = TextStyle(
+  fontFamily: fontNameAN,
+  fontWeight: w500,
+  fontSize: fsize20,
   color: textColorDark,
 );
 
@@ -121,6 +148,13 @@ final TextStyle choiceButnTxtStyle = TextStyle(
   fontWeight: w500,
   fontSize: fsize16,
   color: const Color(0xFF1785C1),
+);
+
+final TextStyle errTxtStyle = TextStyle(
+  fontFamily: fontNameAN,
+  fontWeight: w500,
+  fontSize: fsize16,
+  color: textColorAccent,
 );
 
 final TextStyle dragButnTxtStyle = TextStyle(
@@ -211,6 +245,7 @@ final TextStyle legendStyle = TextStyle(
 final Map<String, TextStyle> textStyle = {
   "AppBar": appBarTextStyle,
   "Banner": bannerTxtStyle,
+  "Bold20": boldTextStyle,
   "Blueish20": blueish20TextStyle,
   "Caption": captionTextStyle,
   "ChoiceButn": choiceButnTxtStyle,

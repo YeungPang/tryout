@@ -15,10 +15,42 @@
                 "mainAxisAlignment",
                 "mainAxisSize",
                 "verticalDirection"
-            ]
+            ],
+            "male": [
+                "Yeung",
+                "Benjamin",
+                "Damian",
+                "Severin"
+            ],
+            "female": [
+                "Kaethi",
+                "Tabea"
+            ],
+            "childrenOf": {
+                "Yeung": [
+                    "Benjamin",
+                    "Damian",
+                    "Tabea",
+                    "Severin"
+                ],
+                "Kaethi": [
+                    "Benjamin",
+                    "Damian",
+                    "Tabea",
+                    "Severin"
+                ],
+                "Benjamin": [
+                    "Samuel",
+                    "Joanna"
+                ],
+                "Damian": [
+                    "Kayla",
+                    "Jamie"
+                ]
+            }
         },
         "clauses": {
-            "mainView": "(_minus ≔ -2) ⋀ ↲(Φ(getxHome))",
+            "mainView": "(_r ≔ []) ⋀ ((∀(_m0) ∈ [1, -2, 3]) ⋀ τ('_m0') ⋀ (_m0 > 0) ⋀ ⊎((∃(_m1) ∈ [1, -1, -2]) ⋀ τ('_m1') ⋀ (_m1 < 0) ⋀ (_l ≔ [_m0, _m1])) ⋀ τ('_l') ⋀ (_r ≪ _l)) ⋀ τ('_r') ⋀ ↲(Φ(getxHome))",
             "details": "↲(Φ(getxDetails))",
             "paging": "↲(Φ(getxPaging))"
         }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../model/locator.dart';
+import './fonts.dart';
 
 final size10 = model.size10;
 final size20 = model.size20;
@@ -14,14 +15,15 @@ const Map<String, Color> colorMap = {
   "btnBlueGradEnd": Color(0xFF3BAEED),
   "correct": Color(0xFF4DC591),
   "correctGradEnd": Color(0xFF82EFC0),
-  "faint": Color.fromRGBO(125, 125, 125, 1.0),
-  "incorrect": Color(0xFFF76F71),
-  "incorrectGradEnd": Color(0xFFFF9DAC),
-  "lightGreyText": Color.fromARGB(255, 220, 221, 223),
   "green": Colors.green,
   "grey": Colors.grey,
   "grey700": Color(0xFF616161),
   "greyText": Color(0xFFBDBDBD),
+  "faint": Color.fromRGBO(125, 125, 125, 1.0),
+  "incorrect": Color(0xFFF76F71),
+  "incorrectGradEnd": Color(0xFFFF9DAC),
+  "lightGreyText": Color.fromARGB(255, 220, 221, 223),
+  "position": Color.fromARGB(255, 207, 15, 44),
   "red": Colors.red,
   "white": Colors.white,
   "white38": Colors.white38,
@@ -42,6 +44,8 @@ final List<dynamic> pinkColorList = [
 
 Map<String, dynamic> resources = {
   "textFieldBorder": textFieldBorder,
+  "aboxPadding": aboxPadding,
+  "boxPadding": boxPadding,
   "catBoxPadding": catBoxPadding,
   "catIconPadding": catIconPadding,
   "clampingScrollPhysics": clampingScrollPhysics,
@@ -161,5 +165,45 @@ final BoxDecoration btnDecoration = elemDecoration;
 
 final catBoxPadding = EdgeInsets.symmetric(vertical: model.size10);
 final catIconPadding = EdgeInsets.symmetric(horizontal: model.size10);
+final boxPadding = EdgeInsets.all(model.size20);
+final aboxPadding =
+    EdgeInsets.symmetric(vertical: model.size10, horizontal: model.size20);
 
 const clampingScrollPhysics = ClampingScrollPhysics();
+
+OutlineInputBorder _buildBorder(Color color) {
+  return OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(size10)),
+    borderSide: BorderSide(
+      color: color,
+      width: 1.0,
+    ),
+  );
+}
+
+InputDecorationTheme inputTheme() => InputDecorationTheme(
+      //isDense: true,
+      floatingLabelBehavior: FloatingLabelBehavior.auto,
+      enabledBorder: _buildBorder(Colors.grey[600]!),
+      errorBorder: _buildBorder(Colors.red),
+      focusedErrorBorder: _buildBorder(Colors.red),
+      focusedBorder: _buildBorder(Colors.grey[600]!),
+      disabledBorder: _buildBorder(Colors.grey[400]!),
+      border: _buildBorder(Colors.grey[600]!),
+      labelStyle: faintTxtStyle,
+      floatingLabelStyle: dragButnTxtStyle,
+      helperStyle: resTxtStyle,
+      hintStyle: dragButnTxtStyle,
+      errorStyle: errTxtStyle,
+      suffixStyle: mediumNormalTextStyle,
+      fillColor: Colors.grey[300],
+      filled: true,
+      focusColor: textColorFaint,
+      hoverColor: textColorFaint,
+      constraints: BoxConstraints(maxWidth: model.scaleWidth * 0.9),
+    );
+
+ThemeData getMainTheme() => ThemeData(
+      primarySwatch: Colors.blue,
+      inputDecorationTheme: inputTheme(),
+    );

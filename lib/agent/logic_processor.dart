@@ -1,22 +1,23 @@
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
-import 'package:tryout/builder/pattern.dart';
-import 'package:tryout/model/locator.dart';
+import '../builder/pattern.dart';
+import '../model/locator.dart';
 import 'package:string_validator/string_validator.dart';
 
 final re = RegExp(
-    r"[⋀⋁⊻∈⋓⋂∉⋃↲⊆⊂⊄≠=≈~⇒&∣|\*\-+－＋\/%≪≫←→≥≤<>≔⊎⊌⥹⥻⟷@,Φσℒℛℝℳ𝕄𝄁ƒ𝓅⋓ℓητ𝕥‥⊖:]");
+    r"[⋀⋁⊻∈⋓⋂∉⋃∄↲⊆⊂⊄≠=≈~⇒&∣|\*\-+－＋⁺⁻\/≁≪≫←→≥≤<>≔⊌⥹⥻⟷@,Φσℒℛℝℳ𝕄𝄁ƒ𝓅⋓ℓητ𝕥‥⊖:]");
 
 const binOp = "∈|@∉⊆⊂⊄≠=≈~⇒&∣⊻≪≫≥≤<>－＋⥹⥻→←⟷";
 const matrixSymbol = "𝔸𝔹ℂ𝔻𝔼𝔽𝕄ℝ𝕥𝄁";
 const matrixOp = "¯𝗑ᵀ﹒";
 
-const arithOp = "*/%-+";
-const priorArithOp = "*/%≁";
+const arithOp = "*/≁-+÷";
+const priorArithOp = "*/≁÷";
+const checkNeg = "≠=≈≥≤<>≔:,*/≁+÷";
 const arithFunc = "㏑㏒𝓮";
 
-const setOP = "⋂⋃⊎⊌－⊖";
+const setOP = "⋂⋃⊌－⊖";
 
 const uniqueBiOp = '≔';
 
@@ -24,7 +25,7 @@ const andOr = "⋀⋁";
 
 const symbol = "∀∃∄Ø|";
 
-const unaryOp = "τηƒℓℛℒℳΦ𝓅⋓↲σ¬∑∆∏⋓⊤㏑㏒𝓮";
+const unaryOp = "τηƒℓℛℒℳΦ𝓅⋓↲ç∄σ¬∑∆∏⋓⊤㏑㏒𝓮";
 
 const sufOp = "☒!☑☐▶✂";
 
@@ -32,8 +33,8 @@ const statSymbol = "ȳρσĀμχŷỹȲỸŶ𝘗𝘊ℙ";
 
 const powerSymbol = "¯⁰¹²³⁴⁵⁶⁷⁸⁹ⁱʲᵏˡᵐⁿˣʸᵀ";
 const elemSymbol = "₀₁₂₃₄₅₆₇₈₉ᵢⱼₖₗₘₙ";
-const powerNo = "⁰¹²³⁴⁵⁶⁷⁸⁹¯";
-RegExp rPNo = RegExp(r"[⁰¹²³⁴⁵⁶⁷⁸⁹¯]");
+const powerNo = "⁰¹²³⁴⁵⁶⁷⁸⁹⁻";
+RegExp rPNo = RegExp(r"[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]");
 
 const nil = 'Ø';
 const exist = '∃';
@@ -41,20 +42,23 @@ const exist = '∃';
 final text = model.map["text"];
 
 class PredResult {
-  Map<String, dynamic> vars;
-  List<dynamic> varList;
-  List<int> pos;
-  int nextPos;
+  Map<String, dynamic>? vars;
+  List<dynamic>? varList;
+  List<int>? pos;
+  int? nextPos;
   bool retain = false;
+  String loop = nil;
   dynamic returnObj;
-  copy(PredResult pr) {
+  List<PredResult> goalStack = [];
+/*   copy(PredResult pr) {
     varList = varList;
     vars = vars;
     pos = pr.pos;
+    loop = pr.loop;
     nextPos = pr.nextPos;
     retain = pr.retain;
     returnObj = pr.returnObj;
-  }
+  } */
 }
 
 class ExprVar {
@@ -69,13 +73,13 @@ class LogicProcessor {
   List<PredResult> predStack = [];
   Map<String, dynamic> vars = {};
   List<dynamic> varList = [];
-  Map<String, dynamic> clauses;
-  PredResult pr;
-  PredResult gr;
+  //Map<String, dynamic>? clauses;
+  PredResult? pr;
+  PredResult? gr;
 
   LogicProcessor(this.myProcess);
 
-  dynamic process(String spec, {Map<String, dynamic> inVar}) {
+  dynamic process(String spec, {Map<String, dynamic>? inVar}) {
     List<String> sl = spec.split(RegExp(r"[,() ]"));
     List<dynamic> args = [];
     String type = '∃';
@@ -103,7 +107,12 @@ class LogicProcessor {
     return r;
   }
 
-  dynamic resolveDynList(List<dynamic> expr) {
+  dynamic resolveDynList(List<dynamic> expr, {bool ret = true}) {
+    String retMulti = nil;
+    if ((expr.isNotEmpty) && (expr[0] == '⊎')) {
+      expr = expr[1];
+      retMulti = '⊎';
+    }
     if (expr.contains(",")) {
       return handleList(expr);
     }
@@ -118,24 +127,32 @@ class LogicProcessor {
     dynamic r;
     bool fail = false;
     pr = PredResult();
-    pr.varList = [];
-    pr.vars = vars;
-    pr.pos = [];
+    pr!.varList = [];
+    pr!.vars = vars;
+    pr!.pos = [];
     if (predStack.isNotEmpty) {
-      pr.pos.addAll(predStack.last.pos);
+      pr!.pos!.addAll(predStack.last.pos!);
     }
-    pr.pos.add(0);
-    pr.nextPos = 1;
-    predStack.add(pr);
+    pr!.pos!.add(0);
+    pr!.nextPos = 1;
+    predStack.add(pr!);
+    goalStack = [];
     while (i < len) {
-      pr.pos.last = i;
+      pr!.pos!.last = i;
       varList = [];
       var e = expr[i];
       if ((i < (len - 2)) &&
           (expr[i + 1] is String) &&
           (binOp.contains(expr[i + 1]))) {
-        r = handleBinaryOp(e, expr[i + 1], expr[i + 2]);
-        i += 2;
+        int j = i + 2;
+        List<dynamic> rl = [];
+        while ((j < len) && (expr[j] != '⋀') && (expr[j] != '⋁')) {
+          rl.add(expr[j++]);
+        }
+        var e2 = (rl.length == 1) ? rl[0] : rl;
+        r = handleBinaryOp(e, expr[i + 1], e2);
+        i = j - 1;
+        //i += 2;
       } else if ((i < (len - 2)) && (expr[i + 1] == '≔')) {
         if (e is String) {
           if (e[0] != '_') {
@@ -171,6 +188,7 @@ class LogicProcessor {
           }
         } else {
           vars[e] = (r == nil) ? null : r;
+          r = true;
         }
         i = j - 1;
       } else {
@@ -187,6 +205,9 @@ class LogicProcessor {
           } else {
             if (e[0] == '_') {
               r = vars[e] ?? e;
+              if (r is String) {
+                r = handlePred(e, null);
+              }
             } else {
               r = handlePred(e, null);
             }
@@ -201,13 +222,14 @@ class LogicProcessor {
           fail = false;
           i = i + 2;
         }
-        if (fail && (gr != null)) {
+        goalStack = pr!.goalStack;
+        if (fail && (goalStack.isNotEmpty)) {
           int inx = backTrack(i, false);
           fail = inx == i;
           i = inx;
         }
         if (fail) {
-          varList = pr.varList;
+          varList = pr!.varList!;
           predStack.removeLast();
           if (predStack.isNotEmpty) {
             pr = predStack.last;
@@ -215,95 +237,119 @@ class LogicProcessor {
           if (varList.isNotEmpty) {
             return varList;
           } else {
-            return false;
+            debugPrint("Fail at: " + expr.toString());
+            //return false;
+            return r;
           }
         }
       } else {
-        if (pr.returnObj != null) {
+        if (pr!.returnObj != null) {
           break;
         }
-        pr.nextPos = ++i;
+        pr!.nextPos = ++i;
         if ((i < expr.length) && (expr[i] == '⋁')) {
           i += 2;
-          pr.nextPos = i + 1;
+          pr!.nextPos = i + 1;
         }
         if (i < expr.length) {
-          if ((varList.length > 1) || (pr.retain)) {
+          if ((varList.length > 1) || (pr!.retain)) {
             gr = PredResult();
             vars = varList[0];
-            if (!pr.retain) {
+            if (!pr!.retain) {
               varList.removeAt(0);
             }
-            gr.varList = varList;
-            gr.pos = [];
-            gr.pos.addAll(pr.pos);
-            gr.nextPos = i;
-            goalStack.add(gr);
+            gr!.varList = varList;
+            varList = [];
+            gr!.pos = [];
+            gr!.pos!.addAll(pr!.pos!);
+            gr!.nextPos = i;
+            gr!.loop = pr!.loop;
+            goalStack.add(gr!);
+            pr!.goalStack = goalStack;
+            //pr!.varList = varList;
           }
         } else {
           if (varList.isNotEmpty) {
-            pr.varList.addAll(varList);
+            pr!.varList!.addAll(varList);
           }
-          if ((pr.varList.isEmpty) || !pr.varList.contains(vars)) {
-            pr.varList.add(vars);
+          if ((pr!.varList!.isEmpty) || !pr!.varList!.contains(vars)) {
+            pr!.varList!.add(vars);
           } else {
-            vars = pr.varList[0];
+            vars = pr!.varList![0];
           }
+          goalStack = pr!.goalStack;
           i = backTrack(i, true);
         }
       }
     }
-    varList = pr.varList;
-    var retObj = pr.returnObj;
-    predStack.removeLast();
-    if (predStack.isNotEmpty) {
-      pr = predStack.last;
-      if (retObj != null) {
-        pr.returnObj = retObj;
-        return retObj;
+    if (ret) {
+      if (retMulti == '⊎') {
+        varList = pr!.varList!;
       }
+      var retObj = pr!.returnObj;
+      String loop = (varList.isNotEmpty) ? pr!.loop : nil;
+      predStack.removeLast();
+      if (predStack.isNotEmpty) {
+        pr = predStack.last;
+        pr!.loop = loop;
+        goalStack = pr!.goalStack;
+        if (retObj != null) {
+          pr!.returnObj = retObj;
+          return retObj;
+        }
+      }
+    } else {
+      predStack.removeLast();
+      pr = predStack.last;
     }
     return r;
   }
 
   int backTrack(int inx, bool succ) {
+    // if ((gr == null) && (goalStack.isNotEmpty)) {
+    //   gr = goalStack.first;
+    // }
+    gr = goalStack.isNotEmpty ? goalStack.last : null;
     int ri = inx;
+    if (succ && (gr != null) && (gr!.loop == '∃')) {
+      gr!.varList = [];
+      goalStack.removeAt(0);
+      return inx;
+    }
     if ((gr != null) &&
-        (gr.pos.length == pr.pos.length) &&
-        (gr.varList.isNotEmpty)) {
+        (gr!.pos!.length == pr!.pos!.length) &&
+        (gr!.varList!.isNotEmpty)) {
       bool stayOn = true;
-      if (gr.pos.length > 1) {
-        for (int j = 0; j < (gr.pos.length - 1); j++) {
-          if (gr.pos[j] != pr.pos[j]) {
+      if (gr!.pos!.length > 1) {
+        for (int j = 0; j < (gr!.pos!.length - 1); j++) {
+          if (gr!.pos![j] != pr!.pos![j]) {
             stayOn = false;
             break;
           }
         }
       }
       if (stayOn) {
-        if ((!gr.retain) || (succ)) {
-          vars = gr.varList[0];
-          pr.pos = [];
-          pr.pos.addAll(gr.pos);
-          ri = gr.nextPos;
+        if ((!gr!.retain) || (succ)) {
+          vars = gr!.varList![0];
+          pr!.pos = [];
+          pr!.pos!.addAll(gr!.pos!);
+          ri = gr!.nextPos!;
         }
-        if ((!gr.retain) || (!succ)) {
-          gr.varList.removeAt(0);
+        if ((!gr!.retain) || (!succ)) {
+          gr!.varList!.removeAt(0);
         }
-        if (gr.varList.isEmpty) {
-          goalStack.removeAt(0);
-          if (goalStack.isNotEmpty) {
-            gr = goalStack.first;
-          } else {
-            gr = null;
-          }
+        if (gr!.varList!.isEmpty) {
+          goalStack.removeLast();
         }
       }
     }
     return ri;
   }
 
-  dynamic handlePred(String e1, List<dynamic> l) {
+  dynamic handlePred(String e1, List<dynamic>? l) {
+    if (e1.isEmpty) {
+      return e1;
+    }
     var ev = (e1[0] == '_') ? vars[e1] ?? e1 : e1;
     if (ev is List<dynamic>) {
       return handleList(ev);
@@ -311,15 +357,18 @@ class LogicProcessor {
       return ev;
     }
     String e = ev;
+    if (e.isEmpty) {
+      return e;
+    }
     if (isNumeric(e[0])) {
-      var v = getNum(e);
+      dynamic v = getNum(e);
       if (v != null) {
         return v;
       }
     }
-    List<dynamic> r2 = (l != null) ? handleList(l) : null;
+    List<dynamic>? r2 = (l != null) ? handleList(l) : null;
     dynamic fact;
-    Map<String, dynamic> facts = myProcess["facts"];
+    Map<String, dynamic>? facts = myProcess["facts"];
     if (facts != null) {
       fact = facts[e];
     }
@@ -327,7 +376,7 @@ class LogicProcessor {
     if (fact != null) {
       r = fact;
       if (l != null) {
-        for (String le in r2) {
+        for (String le in r2!) {
           if (r is Map<String, dynamic>) {
             r = r[le];
           } else {
@@ -339,14 +388,14 @@ class LogicProcessor {
     }
     dynamic clause;
     dynamic cls;
-    bool setc = true;
-    if (clauses != null) {
-      cls = clauses[e];
+    //bool setc = true;
+/*     if (clauses != null) {
+      cls = clauses![e];
       setc = false;
-    }
+    } */
     if (cls == null) {
-      setc = true;
-      Map<String, dynamic> myClauses = myProcess["clauses"];
+      //setc = true;
+      Map<String, dynamic>? myClauses = myProcess["clauses"];
       if (myClauses != null) {
         var mycls = myClauses[e];
         if (mycls != null) {
@@ -370,11 +419,11 @@ class LogicProcessor {
       }
     }
     if (cls != null) {
-      if (setc) {
+/*       if (setc) {
         clauses ??= {};
-        clauses[e] = cls;
-      }
-      String type;
+        clauses![e] = cls;
+      } */
+      String type = '';
       if (l != null) {
         type = '∃';
         for (String s in l) {
@@ -383,7 +432,7 @@ class LogicProcessor {
           }
         }
       }
-      List<String> s2 =
+      List<String>? s2 =
           (r2 != null) ? r2.map((er) => er as String).toList() : null;
       if (cls is List<dynamic>) {
         List<dynamic> cList = [];
@@ -400,10 +449,10 @@ class LogicProcessor {
     }
     if (clause != null) {
       bool success = false;
-      PredResult mpr = pr;
-      List<dynamic> mgoalStack = goalStack;
-      List<dynamic> mpredStack = predStack;
-      PredResult mgr = gr;
+      PredResult? mpr = pr;
+      List<PredResult> mgoalStack = goalStack;
+      List<PredResult> mpredStack = predStack;
+      PredResult? mgr = gr;
       int i = 0;
       if (clause is List<dynamic>) {
         List<dynamic> cvarList = [];
@@ -420,14 +469,16 @@ class LogicProcessor {
             if ((c.clientVars != null) && (varList.isNotEmpty)) {
               for (Map<String, dynamic> v in varList) {
                 Map<String, dynamic> cVars = {};
-                cVars.addAll(mpr.vars);
-                c.clientVars.forEach((key, value) {
+                if ((mpr != null) && (mpr.vars != null)) {
+                  cVars.addAll(mpr.vars!);
+                }
+                c.clientVars!.forEach((key, value) {
                   cVars[key] = v[value];
                 });
                 cvarList.add(cVars);
               }
             }
-            if (pr.returnObj != null) {
+            if (pr!.returnObj != null) {
               break;
             }
             i++;
@@ -435,7 +486,7 @@ class LogicProcessor {
         }
         varList = cvarList;
         if (varList.isNotEmpty) {
-          mpr.vars = varList[0];
+          mpr!.vars = varList[0];
         }
         success = i > 0;
       } else {
@@ -450,22 +501,22 @@ class LogicProcessor {
         success = (r is bool) ? r : r != null;
         if (success) {
           if (c.clientVars != null) {
-            c.clientVars.forEach((key, value) {
-              mpr.vars[key] = vars[value];
+            c.clientVars!.forEach((key, value) {
+              mpr!.vars![key] = vars[value];
             });
           }
         }
       }
-      var retObj = pr.returnObj ?? success;
+      var retObj = pr!.returnObj ?? success;
       pr = mpr;
-      vars = mpr.vars;
+      vars = mpr!.vars ?? {};
       goalStack = mgoalStack;
       predStack = mpredStack;
       gr = mgr;
       return retObj;
     }
     if (l == null) {
-      if ((e is String) && ((e[0] == "'") || (e[0] == '"'))) {
+      if ((e[0] == "'") || (e[0] == '"')) {
         return e.substring(1, e.length - 1);
       }
       return e;
@@ -514,14 +565,40 @@ class LogicProcessor {
       // }
     }
     if (e == 'ℳ') {
-      List<dynamic> r = ((l != null) && (l.isNotEmpty)) ? handleList(l) : [];
       Map<String, dynamic> m = {};
-      for (List<dynamic> ml in r) {
-        m[ml[0]] = ml[1];
+      for (var ml in l) {
+        if (ml is List<dynamic>) {
+          dynamic d = ml[2];
+          if (ml.length > 3) {
+            List<dynamic> lm = [];
+            for (int i = 2; i < ml.length; i++) {
+              lm.add(ml[i]);
+            }
+            d = lm;
+          }
+          bool notVar = true;
+          if ((d is String) && (d[0] == '_')) {
+            d = vars[d];
+            notVar = false;
+          }
+          if (d is String) {
+            d = handlePred(d, null);
+          } else if ((d is List<dynamic>) && (notVar)) {
+            d = resolveDynList(d, ret: false);
+          }
+          m[ml[0]] = d;
+        }
       }
       return m;
     }
-    var r = (l.isEmpty) ? l : resolveDynList(l);
+    if ((e == 'ç') && (l.length == 1)) {
+      var r = l[0];
+      if (r is String) {
+        r = vars[r] ?? r;
+      }
+      return r;
+    }
+    var r = (l.isEmpty) ? l : resolveDynList(l, ret: false);
     if (r is String) {
       r = vars[r] ?? r;
     }
@@ -533,15 +610,18 @@ class LogicProcessor {
         if (r is Map<String, dynamic>) {
           return r.length;
         }
+        if (r is String) {
+          return r.length;
+        }
         return null;
       case 'Φ':
         if (r is List<dynamic>) {
-          Function getPat = model.appActions.getPattern(r[0]);
+          Function? getPat = model.appActions.getPattern(r[0]);
           if (getPat != null) {
             return getPat(r[1]);
           }
         } else {
-          Function getPat = model.appActions.getPattern(r);
+          Function? getPat = model.appActions.getPattern(r);
           if (getPat != null) {
             return getPat(vars);
           }
@@ -553,7 +633,7 @@ class LogicProcessor {
         if (r is ProcessPattern) {
           return r.getWidget();
         }
-        Function getPat = model.appActions.getPattern(r);
+        Function? getPat = model.appActions.getPattern(r);
         if (getPat != null) {
           ProcessPattern p = getPat(vars);
           return p.getWidget();
@@ -572,6 +652,20 @@ class LogicProcessor {
           vars.addAll(r);
         }
         return true;
+      case '∄':
+        if (r is String) {
+          if (r.isEmpty) {
+            return true;
+          }
+          if (r[0] == '_') {
+            return true;
+          }
+          return false;
+        }
+        if (r is List<dynamic>) {
+          return r.isEmpty;
+        }
+        return (r == null) || (r == nil);
       case '¬':
         if (r is bool) {
           return !r;
@@ -580,15 +674,18 @@ class LogicProcessor {
       case 'τ':
         debugPrint(r.toString());
         return true;
-      case '↲':
-        pr.returnObj = r;
+      case 'ç':
         return r;
-      case '∀':
+      case '↲':
+        pr!.returnObj = r;
+        return r;
+/*       case '∀':
         if (varList.isEmpty) {
           varList.add(vars);
         }
-        pr.retain = true;
+        pr!.retain = true;
         return true;
+ */
       case '㏑':
       case '㏒':
       case '𝓮':
@@ -601,12 +698,14 @@ class LogicProcessor {
 
   dynamic handleBinaryOp(var e1, String op, var e2) {
     var r1 = (e1 is List<dynamic>)
-        ? resolveDynList(e1)
+        ? (((e1[0] == '∀') || (e1[0] == '∃'))
+            ? e1
+            : resolveDynList(e1, ret: false))
         : ((e1 is String) && (e1[0] == '_'))
             ? vars[e1] ?? e1
             : handlePred(e1, null);
     var r2 = (e2 is List<dynamic>)
-        ? resolveDynList(e2)
+        ? resolveDynList(e2, ret: false)
         : ((e2 is String) && (e2[0] == '_'))
             ? vars[e2] ?? e2
             : (e2 is String)
@@ -614,6 +713,16 @@ class LogicProcessor {
                 : e2;
     switch (op) {
       case '∈':
+        if (e1 is List<dynamic>) {
+          if ((e1[0] == '∀') || (e1[0] == '∃')) {
+            if (e1[1] is List<dynamic>) {
+              r1 = e1[1][0];
+            } else {
+              r1 = e1[1];
+            }
+            pr!.loop = e1[0];
+          }
+        }
         if ((r1 is String) && (r1[0] == '_')) {
           if (r2 is List<dynamic>) {
             if (r2.isEmpty) {
@@ -653,28 +762,26 @@ class LogicProcessor {
         }
         return null;
       case "≪":
-        if ((e1 is String) && (e1[0] == '_')) {
+        if ((r1 is String) && (r1[0] == '_')) {
           if ((r2 is List<dynamic>) && (r2.isNotEmpty)) {
-            if (r2[0] is String) vars[e1] = r2[0];
+            vars[e1] = r2[0];
             r2.removeAt(0);
             return vars[e1];
           }
         }
-        var r1 = vars[e1] ?? e1;
         if (r1 is List<dynamic>) {
           r1.add(r2);
           return r1;
         }
         return null;
       case "≫":
-        if ((e2 is String) && (e2[0] == '_')) {
+        if ((r2 is String) && (r2[0] == '_')) {
           if ((r1 is List<dynamic>) && (r1.isNotEmpty)) {
             vars[e2] = r1.last;
             r1.removeLast();
             return vars[e2];
           }
         }
-        var r2 = vars[e2] ?? e2;
         if (r2 is List<dynamic>) {
           r2.insert(0, r1);
           return r2;
@@ -695,6 +802,14 @@ class LogicProcessor {
         return checkEqual(r1, r2);
       case '≈':
         return checkApprox(r1, r2);
+      case '>':
+        return r1 > r2;
+      case '<':
+        return r1 < r2;
+      case '≥':
+        return r1 >= r2;
+      case '≤':
+        return r1 <= r2;
       default:
         return null;
     }
@@ -714,7 +829,7 @@ class LogicProcessor {
           rl.add(v1);
         } else {
           if (v is List<dynamic>) {
-            rl.add(resolveDynList(v));
+            rl.add(resolveDynList(v, ret: false));
           } else {
             if (v is String) {
               if ((j < len - 1) && (l[j + 1] is List<dynamic>)) {
@@ -760,7 +875,7 @@ class LogicProcessor {
         String op = e1;
         Map<String, dynamic> m = e2;
         switch (op) {
-          case '⊎':
+          //case '⊎':
           case '⊌':
             e.addAll(m);
             break;
@@ -795,14 +910,14 @@ class LogicProcessor {
         return null;
       }
       List<dynamic> e = (e1 == '⊌') ? e0 : [];
-      if ((e1 != '⊌') || (e0 is! String)) {
+      if ((e1 != '⊌') && (e0 is! String)) {
         e.addAll(e0);
       }
       while (ev.pos <= len) {
         String op = e1;
         List<dynamic> m = e2;
         switch (op) {
-          case '⊎':
+          //case '⊎':
           case '⊌':
           case '⋃':
             e.addAll(m);
@@ -825,6 +940,8 @@ class LogicProcessor {
         if (ev.pos < len) {
           e1 = expr[ev.pos++];
           e2 = getVar(ev);
+        } else {
+          break;
         }
       }
       return e;
@@ -853,19 +970,19 @@ class LogicProcessor {
     return nextArithOp(e0, ev);
   }
 
-  String nextStringOp(String s1, ExprVar ev) {
+  String? nextStringOp(String s1, ExprVar ev) {
     var e1 = ev.expr[ev.pos++];
     if (e1 != '+') {
       return null;
     }
     String s2 = getVar(ev).toString();
     if (ev.pos < ev.expr.length) {
-      s2 = nextStringOp(s2, ev);
+      s2 = nextStringOp(s2, ev)!;
     }
     return s1 + s2;
   }
 
-  List<dynamic> nextListOp(List<dynamic> d1, ExprVar ev) {
+  List<dynamic>? nextListOp(List<dynamic> d1, ExprVar ev) {
     var e1 = ev.expr[ev.pos++];
     if (e1 != '+') {
       return null;
@@ -885,7 +1002,7 @@ class LogicProcessor {
     return d1;
   }
 
-  num nextArithOp(num n1, ExprVar ev) {
+  num? nextArithOp(num n1, ExprVar ev) {
     var e1 = ev.expr[ev.pos++];
     if (!arithOp.contains(e1)) {
       return null;
@@ -903,10 +1020,10 @@ class LogicProcessor {
         case '/':
           n2 = n1 / n2;
           break;
-        case '%':
+        case '≁':
           n2 = n1 % n2;
           break;
-        case '≁':
+        case '÷':
           n2 = n1 ~/ n2;
           break;
       }
@@ -916,7 +1033,7 @@ class LogicProcessor {
       return n2;
     } else {
       if (ev.pos < ev.expr.length) {
-        n2 = nextArithOp(n2, ev);
+        n2 = nextArithOp(n2, ev)!;
       }
       switch (e1) {
         case '+':
@@ -932,8 +1049,8 @@ class LogicProcessor {
     }
   }
 
-  num getNum(dynamic value) {
-    num base;
+  num? getNum(dynamic value) {
+    num? base;
     String exp;
     dynamic bStr;
     if (value is String) {
@@ -943,9 +1060,9 @@ class LogicProcessor {
           bStr = value.substring(1);
           base = num.tryParse(bStr);
           if (value[0] == '㏑') {
-            return log(base);
+            return log(base!);
           }
-          return log(base) / ln10;
+          return log(base!) / ln10;
         case '𝓮':
           bStr = '𝓮';
           base = e;
@@ -962,11 +1079,11 @@ class LogicProcessor {
     } else {
       List<dynamic> ld = value;
       bStr = (ld[0] is List<dynamic>)
-          ? resolveDynList(ld[0])
+          ? resolveDynList(ld[0], ret: false)
           : vars[ld[0]] ?? ld[0];
       if (arithFunc.contains(bStr)) {
         dynamic bd = (ld[1] is List<dynamic>)
-            ? resolveDynList(ld[1])
+            ? resolveDynList(ld[1], ret: false)
             : vars[ld[1]] ?? ld[1];
         if (bd is num) {
           base = bd;
@@ -975,17 +1092,17 @@ class LogicProcessor {
         }
         switch (bStr) {
           case '㏑':
-            return log(base);
+            return log(base!);
           case '㏒':
-            return log(base) / ln10;
+            return log(base!) / ln10;
           case '𝓮':
-            return pow(e, base);
+            return pow(e, base!);
           default:
             break;
         }
       }
       exp = (ld[1] is List<dynamic>)
-          ? resolveDynList(ld[1])
+          ? resolveDynList(ld[1], ret: false)
           : vars[ld[1]] ?? ld[1];
     }
     if (bStr is num) {
@@ -1045,38 +1162,39 @@ class Clause {
   final String name;
   final String spec;
   final Map<String, dynamic> process;
-  Map<String, dynamic> vars;
-  Map<String, dynamic> rvars;
-  Map<String, dynamic> clientVars;
-  List<dynamic> preds;
+  late Map<String, dynamic> vars;
+  //Map<String, dynamic> rvars;
+  Map<String, dynamic>? clientVars;
+  List<dynamic> preds = [];
   List<dynamic> varStack = [];
-  String type;
-  String argStr;
-  List<dynamic> args;
+  String? type;
+  String? argStr;
+  List<dynamic>? inargs;
 
   Clause(this.name, this.spec, this.process);
 
   init() {
     vars = {};
-    if ((preds == null) || (preds.isEmpty)) {
+    if (preds.isEmpty) {
       List<String> sl = spec.split('|');
       String predSpec;
       if (sl.length > 1) {
         predSpec = sl[1].trim();
         argStr = sl[0].trim();
-        if ((argStr[0] == '∀') || (argStr[0] == '∃')) {
-          type = argStr[0];
-          argStr = argStr.substring(1).trimLeft();
+        if ((argStr![0] == '∀') || (argStr![0] == '∃')) {
+          type = argStr![0];
+          argStr = argStr!.substring(1).trimLeft();
         }
-        args = splitArgs(argStr);
+        inargs = splitArgs(argStr!);
       } else {
         predSpec = spec.trim();
       }
       preds = splitPred(predSpec);
     }
+    return preds.isNotEmpty;
   }
 
-  bool match(String mtype, List<String> margs, Map<String, dynamic> mVars) {
+  bool match(String mtype, List<String>? margs, Map<String, dynamic> mVars) {
     init();
     clientVars = null;
     if ((margs == null) || (margs.isEmpty)) {
@@ -1089,6 +1207,7 @@ class Clause {
     if ((mtype != type) && (type != null)) {
       return false;
     }
+    List<dynamic> args = inargs!;
     if ((margs != null) && (margs.length != args.length)) {
       return false;
     }
@@ -1107,7 +1226,7 @@ class Clause {
         }
         if (margs[i][0] == '_') {
           clientVars ??= {};
-          clientVars[margs[i]] = args[i];
+          clientVars![margs[i]] = args[i];
         }
       } else {
         if (args[i][0] != '_') {
@@ -1120,7 +1239,7 @@ class Clause {
         vars[args[i]] = v;
         if ((v == nil) || (v == null)) {
           clientVars ??= {};
-          clientVars[args[i]] = args[i];
+          clientVars![args[i]] = args[i];
         }
       }
     }
@@ -1146,8 +1265,18 @@ List<String> splitExpr(String exStr) {
   List<String> sl = exStr.split(re);
   List<String> rl = [];
   int i = 0;
+//   int l = 0;
   for (String s in sl) {
     i += s.length;
+    /*
+    l = rl.length - 1;
+    if ((l >= 0) &&
+        (rl[l] == "-") &&
+        isNumeric(s) &&
+        ((l == 0) || checkNeg.contains(rl[l - 1]))) {
+      s = '-' + s.trim();
+      rl.removeLast();
+    } */
     rl.add(s.trim());
     if (i < exStr.length) {
       rl.add(exStr[i]);
@@ -1159,12 +1288,28 @@ List<String> splitExpr(String exStr) {
 
 List<dynamic> splitPred(String predSpec) {
   List<dynamic> predStack = [];
+  List<String> bracStack = [];
   RegExp reb = RegExp(r"[\[({]");
   List<String> brac = predSpec.split(reb);
+  reb = RegExp(r"[\])}]");
+  int ketLen = 0;
+  int bracLen = 0;
   List<dynamic> cp = [];
   int i = 0;
   for (String s in brac) {
     if ((predSpec[i] == '(') || (predSpec[i] == '[') || (predSpec[i] == '{')) {
+      bracLen++;
+      switch (predSpec[i]) {
+        case '(':
+          bracStack.add(')');
+          break;
+        case '[':
+          bracStack.add(']');
+          break;
+        case '{':
+          bracStack.add('}');
+          break;
+      }
       List<dynamic> acp = cp;
       cp = [];
       if (predSpec[i] == '[') {
@@ -1200,13 +1345,35 @@ List<dynamic> splitPred(String predSpec) {
       i++;
     }
     if (s.isNotEmpty) {
-      reb = RegExp(r"[\])}]");
       List<String> ket = s.split(reb);
       for (String sk in ket) {
-        if ((predSpec[i] == ')') ||
-            (predSpec[i] == ']') ||
-            (predSpec[i] == '}')) {
+/*         if (bracStack.isNotEmpty && (bracStack.last == '}') && sk.isNotEmpty) {
+          List<String> items = sk.split(",");
+          for (String item in items) {
+            if (item.isNotEmpty && (!item.contains(":"))) {
+              throw Exception("Invalid map: " + sk);
+            }
+          }
+        } */
+        if ((i < predSpec.length) &&
+            ((predSpec[i] == ')') ||
+                (predSpec[i] == ']') ||
+                (predSpec[i] == '}'))) {
+          ketLen++;
+          if (bracStack.isEmpty) {
+            throw Exception("Expect opening for " + predSpec[i] + " at " + s);
+          }
           cp = predStack[predStack.length - 1];
+          if (predSpec[i] != bracStack.last) {
+            throw Exception("Expect " +
+                bracStack.last +
+                " but found " +
+                predSpec[i] +
+                " at " +
+                s);
+          } else {
+            bracStack.removeLast();
+          }
           predStack.removeLast();
           i++;
         }
@@ -1233,18 +1400,33 @@ List<dynamic> splitPred(String predSpec) {
     }
   }
   //List<dynamic> ucp = updatePredFunc(cp);
+  if (bracStack.isNotEmpty) {
+    throw Exception("Missing closing " + bracStack.last + " for " + predSpec);
+  }
+  if (bracLen != ketLen) {
+    throw Exception("Brac length is " +
+        bracLen.toString() +
+        " and ket length is " +
+        ketLen.toString());
+  }
   return updatePredFunc(cp);
 }
 
 List<dynamic> updatePredFunc(List<dynamic> predList) {
   List<dynamic> newList = [];
   int plen = predList.length - 1;
+
   if (predList.contains(":")) {
     int i = 0;
     while (i < predList.length) {
       if (predList[i] == ',') {
         newList.add(',');
         i++;
+      }
+      if (predList[i + 1] != ':') {
+        throw Exception("Invalid map: " +
+            predList[i].toString() +
+            predList[i + 1].toString());
       }
       List<dynamic> ml = [predList[i++], ',', predList[++i]];
       i++;
@@ -1256,13 +1438,18 @@ List<dynamic> updatePredFunc(List<dynamic> predList) {
     newList = updatePredFunc(newList);
     return newList;
   }
+
   for (int i = 0; i <= plen; i++) {
     var el = predList[i];
+    int ai = i + 1;
     if ((el is String) &&
         (!re.hasMatch(el)) &&
         (i < plen) &&
-        (predList[i + 1] is List<dynamic>)) {
-      List<dynamic> pl = updatePredFunc(predList[i + 1]);
+        (predList[ai] is List<dynamic>)) {
+      if ((el == 'ℳ') && (!predList[ai].contains(":"))) {
+        throw Exception("Invalid map: " + predList[ai].toString());
+      }
+      List<dynamic> pl = updatePredFunc(predList[ai]);
       newList.add([el, pl]);
       i++;
     } else {
@@ -1270,14 +1457,14 @@ List<dynamic> updatePredFunc(List<dynamic> predList) {
         List<dynamic> pl = updatePredFunc(el);
         newList.add(pl);
       } else {
-        newList.add(el);
         if ((el is String) &&
-            ((el == ',') || (el == '≔')) &&
-            (predList[i + 1] == '-')) {
-          i += 2;
-          List<dynamic> ml = ['-', predList[i]];
-          newList.add(ml);
+            (el == '-') &&
+            ((predList[i + 1] is int) || (predList[i + 1] is double)) &&
+            ((i == 0) || checkNeg.contains(predList[i - 1]))) {
+          el = predList[i + 1] * -1;
+          i++;
         }
+        newList.add(el);
       }
     }
   }

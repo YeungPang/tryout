@@ -1,5 +1,5 @@
-import 'package:url_launcher/url_launcher.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class MapUtil {
   MapUtil._();
@@ -7,7 +7,7 @@ class MapUtil {
   static Future<void> openMap(double latitude, double longitude) async {
     String googleMapUrl =
         "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude";
-    await launch(googleMapUrl);
+    await launchUrlString(googleMapUrl);
   }
 
   static Future<void> openMapFromAddr(String addr) async {
@@ -17,8 +17,8 @@ class MapUtil {
         ',' +
         placemarks[0].longitude.toString();
     //await launch(googleMapUrl);
-    if (await canLaunch(googleMapUrl)) {
-      await launch(googleMapUrl);
+    if (await canLaunchUrlString(googleMapUrl)) {
+      await launchUrlString(googleMapUrl);
     } else {
       throw "Cannot open map";
     }
@@ -27,10 +27,14 @@ class MapUtil {
   static Future<void> addrToMap(String addr) async {
     String addrPlus = addr.replaceAll(' ', '+');
     String googleMapUrl = "https://www.google.com/maps/place/" + addrPlus;
-    await launch(googleMapUrl);
+    await launchUrlString(googleMapUrl);
   }
 
   static Future<void> toTel(String telNo) async {
-    await launch("tel:" + telNo);
+    await launchUrlString("tel:" + telNo);
+  }
+
+  static Future<void> toUrl(String url) async {
+    await launchUrlString("https://" + url);
   }
 }

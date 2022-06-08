@@ -11,7 +11,7 @@ const int plen = 10;
 
 class PagingScreen extends StatelessWidget {
   final Map<String, dynamic> map;
-  const PagingScreen(this.map, {Key key}) : super(key: key);
+  const PagingScreen(this.map, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -67,10 +67,10 @@ class PagingScreen extends StatelessWidget {
 class PagingPattern extends ProcessPattern {
   PagingPattern(Map<String, dynamic> map) : super(map);
   @override
-  Widget getWidget({String name}) {
+  Widget getWidget({String? name}) {
     RefreshController controller = RefreshController();
     map["_controller"] = controller;
-    List<dynamic> pList = resxController.getCache("pList");
+    List<dynamic>? pList = resxController.getCache("pList");
     if (pList == null) {
       resxController.setRxValue("pInx", -1);
       pList = [];

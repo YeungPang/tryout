@@ -1,24 +1,25 @@
 import 'dart:convert';
 import 'dart:core';
 import 'package:flutter/material.dart';
-import 'package:tryout/agent/control_agent.dart';
-import 'package:tryout/app/xeminoApp/xemino_app.dart';
-import 'package:tryout/builder/pattern.dart';
-import 'package:tryout/model/locator.dart';
-import 'package:tryout/model/main_model.dart';
-import 'package:tryout/agent/resx_controller.dart';
-
+import '../agent/control_agent.dart';
+import '../app/xeminoApp/xemino_app.dart';
+import '../builder/pattern.dart';
+import '../model/locator.dart';
+import '../model/main_model.dart';
+import '../agent/resx_controller.dart';
+import 'crmApp/crm_app.dart';
 import 'getxApp/home/view/home.dart';
 
-const String mainApp = "xemino";
+const String mainApp = "crm";
 final Map<String, dynamic> appMap = {
   "getX": ["assets/models/getx.json", getxAppInit],
-  "xemino": ["assets/models/xemino.json", xeminoAppInit]
+  "xemino": ["assets/models/xemino.json", xeminoAppInit],
+  "crm": ["assets/models/crm.json", crmAppInit],
 };
 
 class HomePage extends StatelessWidget {
   final ResxController resxController = ResxController();
-  HomePage({Key key}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -88,10 +89,10 @@ class HomePage extends StatelessWidget {
       return FutureBuilder<String>(
           future: model.getJson(context, mainJson),
           builder: (context, snapshot) {
-            if (snapshot.hasError) debugPrint(snapshot.error);
+            if (snapshot.hasError) debugPrint(snapshot.error.toString());
 
             return snapshot.hasData
-                ? _getBodyUi(model, snapshot.data)
+                ? _getBodyUi(model, snapshot.data!)
                 : const Center(
                     child: CircularProgressIndicator(),
                   );

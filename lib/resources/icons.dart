@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:tryout/builder/pattern.dart';
-import 'package:tryout/model/locator.dart';
-import 'package:tryout/resources/basic_resources.dart';
+import '../builder/pattern.dart';
+import '../model/locator.dart';
+import './basic_resources.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SGIcons {
   SGIcons._();
 
   static const _kFontFam = 'SGIcons2';
-  static const String _kFontPkg = null;
+  static const _kFontPkg = null;
 
   static const IconData almost =
       IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
@@ -100,11 +101,8 @@ class SGIcons {
 class IconPattern extends ProcessPattern {
   IconPattern(Map<String, dynamic> map) : super(map);
   @override
-  Widget getWidget({String name}) {
-    IconData id = myIcons[map["_icon"]];
-    if (id == null) {
-      return null;
-    }
+  Widget getWidget({String? name}) {
+    IconData? id = myIcons[map["_icon"]];
     double size = map["_iconSize"] ?? 24.0 * model.sizeScale;
     var c = map["_iconColor"] ?? Colors.black;
     if (c is String) {
@@ -117,6 +115,7 @@ class IconPattern extends ProcessPattern {
 }
 
 const Map<String, IconData> myIcons = {
+  "abort": Icons.cancel_presentation,
   "almost": SGIcons.almost,
   "answer": SGIcons.answer,
   "arrowBack": Icons.arrow_back,
@@ -124,6 +123,8 @@ const Map<String, IconData> myIcons = {
   "article": SGIcons.article,
   "back": SGIcons.back,
   "bookmark": SGIcons.bookmark,
+  "calendar": Icons.calendar_month,
+  "cached": Icons.cached,
   "camera": SGIcons.camera,
   "cancel": SGIcons.cancel,
   "challenge": SGIcons.challenge,
@@ -150,6 +151,7 @@ const Map<String, IconData> myIcons = {
   "menu_hamburger": SGIcons.menu_hamburger,
   "next": SGIcons.next,
   "notification": SGIcons.notification,
+  "pickTime": Icons.av_timer,
   "plus": SGIcons.plus,
   "phone": Icons.phone,
   "progress": SGIcons.progress,
@@ -161,14 +163,22 @@ const Map<String, IconData> myIcons = {
   "recent": SGIcons.recent,
   "response": SGIcons.response,
   "rightArrowFull": Icons.arrow_right_outlined,
+  "save": Icons.save,
+  "start": Icons.start,
+  "schedule": Icons.schedule,
   "search": SGIcons.search,
   "settings": SGIcons.settings,
   "share": SGIcons.share,
   "shop": SGIcons.shop,
+  "sortDown": FontAwesomeIcons.arrowDownAZ,
+  "sortUp": FontAwesomeIcons.arrowUpZA,
+  "stop": Icons.stop,
   "thumbsup": SGIcons.thumbsup,
+  "timer": Icons.timer,
   "toggle_off": SGIcons.toggle_off,
   "toggle_on": SGIcons.toggle_on,
   "unread": SGIcons.unread,
   "upload": SGIcons.upload,
+  "website": Icons.language,
   "wrong": SGIcons.wrong,
 };

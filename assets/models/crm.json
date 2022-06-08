@@ -4,17 +4,29 @@
     "main": "contact",
     "text": {
         "abortTimer": "Zeitmessung abbrechen",
+        "brac": "(",
         "colon": ":",
         "comma": ",",
         "contact": "Kontakte",
+        "customer": "Kunden",
         "date": "Datum:  ",
+        "dayAgo": " (vor #n# Tagen)",
+        "dash": "-",
+        "email": "demo-user@sevconcept.ch",
         "End": "Ende",
         "hash": "#",
+        "hourAgo": " (vor #n# Stunden)",
         "interval": "Intervall:  ",
+        "ket": ")",
+        "minAgo": " (vor #n# Minuten)",
+        "notice": "Notizen",
+        "password": "Passwort",
+        "requiredField": "Das Feld ist obligatorisch!",
         "saveTimer": "Zeitmessung speichen",
         "select one": "Wähle eins",
         "semicolon": ";",
         "service": "Dienstleistung:",
+        "star": "*",
         "Start": "Start",
         "startTimer": "Zeitmessung starten",
         "stopTimer": "Zeitmessung stoppen",
@@ -61,8 +73,8 @@
         "clauses": {
             "mainView": "setConfig(config, patterns) ⋀ ↲(mainScaffold)",
             "mainScaffold": [
-                "⋓({_text: ℛ(model, title), _key: key(), _pageController: ℛ(pageController), _pageNoti: 'pageNoti'}) ⋀ ℛ(setResxValue, _pageNoti, 0) ⋀ ",
-                "(_body ≔ mainBody) ⋀ ⋓({_title: mainAppBar, _bottomBar: mainBottomBar, _leading: hamburgerMenu}) ⋀ ↲(scaffoldPat)"
+                "⋓({_text: ℛ(model, title), _key: key()}) ⋀ ",
+                "(_body ≔ mainBody) ⋀ ⋓({_title: mainAppBar, _leading: hamburgerMenu}) ⋀ ↲(scaffoldPat)"
             ],
             "mainBottomBar": [
                 "_pageController, _pageNoti, _totalPages | ⋓({_inxIcon: Φ(Icon, {_icon: 'complete', _iconColor: 'btnBlue', ",
@@ -85,45 +97,63 @@
                 "↲(Φ(IconButton, {_icon: 'menu', _iconColor: ℛ(color, 'white')}))"
             ],
             "mainBody": [
-                "_key, _pageController, _pageNoti, _totalPages | (_p1 ≔ Φ(Container, {_child: page1, _color: ℛ(color, 'lightGreyText')})) ⋀ ",
-                "(_p2 ≔ Φ(Container, {_color: ℛ(color, 'correct')})) ⋀ (_p3 ≔ Φ(Container, {_color: ℛ(color, 'incorrect')})) ⋀ ",
-                "(_children ≔ [_p1, _p2, _p3]) ⋀ (_totalPages ≔ η(_children)) ⋀ ↲(Φ(PageView))"
+                "login({_url: 'crm.sevconcept.ch', _email: ⊤(email), _pw: 'demouser123', _processEvent: createEvent(['crmfsm', {_event: 'loadData'}])}) ⋀ ",
+                "⋓({_child: Φ(ProgressText, {_text: 'Logging in ....', _textStyle : ℛ(textStyle, Normal16)}), _alignment: decode(alignment, center)}) ⋀ ",
+                "ℛ(setResxValue, 'mainPage', mainContainer) ⋀ ↲(page1)"
             ],
+            "mainContainer": "_child, _alignment | ↲(Φ(Container, {_width: ℛ(swratio, Ø, 1.0), _height: ℛ(hratio, Ø, 0.8), _child: _child}))",
             "page1": [
-                "mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ (_s ≔ Φ(SizedBox, {_width: ℛ(wratio, Ø, 0.05)})) ⋀ ",
-                "(_tText ≔ Φ(Text, {_text: ⊤('contact'), _textStyle: ℛ(textStyle, Title)})) ⋀ ",
-                "⋓({_iconColor: 'grey700', _icon: 'plus'}) ⋀ (_ic1 ≔ Φ(IconButton)) ⋀ ",
-                "(_icon ≔ 'search') ⋀ (_ic2 ≔ Φ(IconButton)) ⋀ (_icon ≔ 'filter') ⋀ (_ic3 ≔ Φ(IconButton)) ⋀ ",
-                "(_children ≔ [_ic1, _ic2, _ic3]) ⋀ (_r ≔ Φ(Row)) ⋀ (_children ≔ [_tText, _r]) ⋀ ",
-                "(_sb ≔ Φ(Container, {_width: ℛ(wratio, Ø, 0.95), _child: Φ(Row)})) ⋀ (_itemRefMap ≔ ℛ(model, main)) ⋀ (_itemRef ≔ _itemRefMap[elemList]) ⋀ ",
-                "↲(Φ(Column, {_children: [_sb, baseNavi]}))"
+                "_value | mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ ",
+                "(_tText ≔ Φ(Text, {_text: ⊤('customer'), _textStyle: ℛ(textStyle, Title)})) ⋀ ",
+                "⋓({_iconColor: 'grey700', _icon: 'plus', _iconSize: 20.0, _sd: Φ(SizedBox, {_width: ℛ(wratio, Ø, 0.03)})}) ⋀ (_ic1 ≔ Φ(IconText)) ⋀ (_tc ≔ ℛ(textController)) ⋀ ",
+                "(_ic3 ≔ Φ(IconText, {_icon: 'filter', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage', _textController: _tc}, _onTap: createEvent('filter')})) ⋀ ",
+                "(_ic4 ≔ Φ(IconText, {_icon: 'sortDown', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage'}, _onTap: createEvent('sort')})) ⋀ ",
+                "(_ic5 ≔ Φ(IconText, {_icon: 'sortUp', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage', _ascending: false}, _onTap: createEvent('sort')})) ⋀ ",
+                "(_ic6 ≔ Φ(IconText, {_icon: 'cached', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage'}, _onTap: createEvent('refresh')})) ⋀ ",
+                "(_children ≔ [_ic1, _sd, _ic3, _sd, _ic4, _sd, _ic5, _sd, _ic6]) ⋀ (_r ≔ Φ(Row)) ⋀ ",
+                "(_ft ≔ Φ(Container, {_child: Φ(InTextField, {_textController: _tc, _autofocus: false}), _width: ℛ(wratio, Ø, 0.32), _height: ℛ(hratio, Ø, 0.05)})) ⋀ ",
+                "(_children ≔ [_tText, _ft,  _r]) ⋀ (_sb ≔ Φ(Container, {_width: ℛ(wratio, Ø, 0.95), _child: Φ(Row)})) ⋀ ",
+                "_mainPage ≔ Φ(Obx, {_child: Φ(Container), _valueName: 'mainPage'}) ⋀ ↲(Φ(Column, {_children: [_sb, _mainPage]}))"
             ],
             "baseNavi": [
-                "_itemRefMap | ⋓({_childPattern: 'elemRow', _childMap: {_itemRefMap: _itemRefMap}, _dataCache: {_dataList: _itemRefMap[elemList], _plen: 5}}) ⋀ ",
-                "⋓({_child: Φ(Paging), _alignment: decode(alignment, topCenter), ",
-                "_width: ℛ(swratio, Ø, 1.0), _height: ℛ(hratio, Ø, 0.72)}) ⋀ ↲(Φ(Container))"
+                "_value | ⋓({_childPattern: 'textCard', _childMap: {_tName: 'title'}, _dataCache: {_dataList: _value, _plen: 30, _nrlen: 2, _prlen: 2}}) ⋀ ",
+                "⋓({_child: Φ(Paging), _alignment: decode(alignment, topCenter)}) ⋀ ↲(mainContainer)"
             ],
-            "elemRow": [
-                "_item, _index, _itemRefMap | (_header ≔ _itemRefMap[header]) ⋀ (_dec ≔ ℛ(textStyle, Normal16)) ⋀ ",
-                "mapPat(_header, _item) ⋀ ⋓({_c: Φ(Text, {_text: _company, _textStyle: ℛ(textStyle, Title)}), ",
-                "_n: Φ(Text, {_text: _name, _textStyle: _dec}), _a1: Φ(Text, {_text: _address[0], _textStyle: _dec}), ",
-                "_a2: Φ(Text, {_text: _address[1], _textStyle: _dec}), ",
-                "_height: ℛ(hratio, Ø, 0.0468), _d: Φ(Divider, {_thickness: 1.5}), _data: _tel, _pat: 'telTile'}) ⋀ ",
-                "mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ (_addr ≔ (_address[0] + ⊤(comma) + ' ' + _address[1])) ⋀ ",
-                "(_icc ≔ Φ(IconButton, {_onTap: createEvent(['fsmEvent', {_event: 'timer', _company: _company}]), _tapAction: 'timerfsm', _iconColor: 'btnBlue', _icon: 'schedule'})) ⋀ ",
-                "(_children ≔ [_c, _icc]) ⋀ (_child ≔ Φ(Row)) ⋀ (_cc ≔ Φ(SizedBox)) ⋀ ",
-                "(_ic ≔ Φ(IconButton, {_onTap: createEvent(addrToMap), _tapAction: _addr, _iconColor: 'position', _icon: 'map'})) ⋀ ",
-                "(_children ≔ [_a1, _ic]) ⋀ (_child ≔ Φ(Row)) ⋀ (_ac ≔ Φ(SizedBox)) ⋀ mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ",
-                "(_children ≔ [_cc, _n, _d, _ac, _a2, _d]) ⋀ (_children ⊌ itItems) ⋀  ⋓({_child: Φ(Padding, {_child: Φ(Column), _padding: ℛ(appRes, boxPadding)}), ",
-                "_elevation: ℛ(hratio, Ø, 0.01), _cardRadius: ℛ(hratio, Ø, 0.015)}) ⋀ (_h ≔ ((η(_children) - 7) * _height)) ⋀ ",
-                "⋓({_child: Φ(Card), _width: ℛ(swratio, Ø, 0.95), _height: (ℛ(hratio, Ø, 0.35) + _h)}) ⋀ ↲(Φ(Container))"
+            "textCard": [
+                "_item, _index, _tName | ⋓({_child: Φ(Text, {_text: _item[_tName], _textStyle: ℛ(textStyle, Normal16)}), _padding: ℛ(appRes, aboxPadding)}) ⋀ ",
+                "(_child ≔ Φ(Padding)) ⋀ ↲(Φ(TapItem, {_child: Φ(Card), _tapAction: 'crmfsm', _onTap: createEvent(['fsmEvent', {_event: 'selected', _value: _item}])}))"
             ],
-            "itItems": "_data, _pat, _dec, _height | (_children ≔ []) ⋀ ((_item ∈ _data) ⋀ (_c  ≔ _pat) ⋀ (_children ≪ _c)) ⋀ ↲(_children)",
+            "contactRow": [
+                "_item | cardConst ⋀ (_chi ≔ [Φ(Text, {_text: _item['title'], _textStyle: ℛ(textStyle, Bold20)})]) ⋀ ",
+                "(_tName ≔ 'cf_email') ⋀ addItem ⋀ τ('contact addItem') ⋀ (∄(_item['cf_telefon']) ⋁ ",
+                "((_tel ≔ _item['cf_telefon']) ⋀ (_pref ≔ 'Tel') ⋀ (_chi ≪ telTile))) ⋀ (∄(_item['cf_mobile']) ⋁ ",
+                "((_tel ≔ _item['cf_mobile']) ⋀ (_pref ≔ 'Mobile') ⋀ (_chi ≪ telTile))) ⋀ (_tName ≔ 'cf_position__rolle') ⋀ addItem ⋀ ",
+                "(_chi ⊌ [_div, Φ(Text, {_text: _item['entryDate'], _textStyle: _dec})]) ⋀ mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ",
+                "(_children ≔ _chi) ⋀ ⋓({_child: Φ(Padding, {_child: Φ(Column), _padding: ℛ(appRes, boxPadding)}), ",
+                "_elevation: ℛ(hratio, Ø, 0.01), _cardRadius: ℛ(hratio, Ø, 0.015)}) ⋀ ↲(Φ(SizedBox, {_child: Φ(Card), _width: ℛ(swratio, Ø, 0.95)}))"
+            ],
+            "noticeRow": [
+                "_item | cardConst ⋀ ⋓({_t: Φ(Text, {_text: _item['title'], _textStyle: ℛ(textStyle, Bold20)}), ",
+                "_no: Φ(Text, {_text: _item['cf_notiz'], _textStyle: _dec}), _ed: Φ(Text, {_text: _item['entryDate'], _textStyle: _dec})}) ⋀ ",
+                "((∄(_item['cf_kontakt']) ⋀ (_children ≔ [_t, _no, _div, _ed])) ⋁ ",
+                "(⋓({_data: _item['cf_kontakt'], _pat: 'textButtonTile'}) ⋀ ",
+                "(_children ≔ [_t, Φ(Wrap, {_children: itItems, _alignment: decode(wrapAlignment, spaceBetween)}), _no, _div, _ed]))) ⋀ ",
+                "mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ⋓({_child: Φ(Padding, {_child: Φ(Column), _padding: ℛ(appRes, boxPadding)}), ",
+                "_elevation: ℛ(hratio, Ø, 0.01), _cardRadius: ℛ(hratio, Ø, 0.015)}) ⋀ ↲(Φ(SizedBox, {_child: Φ(Card), _width: ℛ(swratio, Ø, 0.95)}))"
+            ],
+            "itItems": "_data, _pat, _dec, _height | (_children ≔ []) ⋀ ((∀(_item) ∈ _data) ⋀ (_c ≔ _pat) ⋀ (_children ≪ _c)) ⋀ ↲(_children)",
+            "addItem": "_item, _dec, _tName, _chi | (∄(_item[_tName]) ⋀ ↲(true)) ⋁ ↲(_chi ≪ (Φ(Text, {_text: _item[_tName], _textStyle: _dec})))",
+            "addPat": "_item, _dec, _tName, _pat, _chi | (τ(_item[_tName]) ⋀ ∄(_item[_tName]) ⋀ ↲(true)) ⋁ ↲(_pat)",
             "textTile": "_item, _dec | ↲(Φ(Text, {_text: _item, _textStyle: _dec}))",
             "telTile": [
-                "_item, _dec, _height | (_tText ≔ ('Tel' + ⊤(colon) + ' ' + _item)) ⋀ (_t ≔ Φ(Text, {_text: _tText, _textStyle: _dec})) ⋀ ",
-                "(_ic ≔ Φ(IconButton, {_onTap: createEvent(toTel), _tapAction: _item, _iconColor: 'red', _icon: 'phone'})) ⋀ ",
+                "_tel, _pref, _dec, _height | (_tText ≔ (_pref + ⊤(colon) + ' ' + _tel)) ⋀ (_t ≔ Φ(Text, {_text: _tText, _textStyle: _dec})) ⋀ ",
+                "(_ic ≔ Φ(IconButton, {_onTap: createEvent(toTel), _tapAction: _tel, _iconColor: 'red', _icon: 'phone'})) ⋀ ",
                 "mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ (_children ≔ [_t, _ic]) ⋀ (_child ≔ Φ(Row)) ⋀ ↲(Φ(SizedBox))"
+            ],
+            "textButtonTile": [
+                "_item, _dec | ⋓({_color: ℛ(color, 'greyText'), _width: (η(_item) * ℛ(sizeScale, Ø, 8.0)), ",
+                "_noShadow: true, _height: ℛ(size20), _textAlign: decode(textAlign, center)}) ⋀ ",
+                "_child ≔ Φ(Text, {_text: _item, _textStyle: ℛ(textStyle, faintTxtStyle)}) ⋀ ↲(Φ(ColorButton))"
             ],
             "timerDialog": [
                 "_company | (_event ≔ 'timer') ⋀ (timerUpdateStart) ⋀ (_compState ≔ ℛ(getCache, ('timer' + _company))) ⋀ (_value ≔ _compState['_value']) ⋀ ",
@@ -186,8 +216,20 @@
             "timerExit": "↲(popRoute())",
             "timerService": "_value, _company | (_mtimer ≔ ℛ(getCache, ('timer' + _company))) ⋀ ↲(_mtimer ⊌ {_value: _value})",
             "timerAbort": "_company | ℛ(removeCache, ('timer' + _company)) ⋀ ↲(popRoute())",
-            "timerfsm": [
-                "_event, _company | (_event = 'timer') ⋀ ↲(buildDialog('timerDialog', {_company: _company}))"
+            "crmfsm": [
+                "_event, _value | ((_event = 'loadData') ⋀ dataLoading ⋀ ",
+                "ℛ(setCache, 'mainPageEvent', createEvent(['crmfsm', {_event: 'loaded'}])) ⋀ ↲(getGroupList({_pageId: 6, _columnId: 1, _groupName: 'mainPage'}))) ⋁ ",
+                "((_event = 'refresh') ⋀ ↲refresh({_groupName: 'mainPage'})) ⋁ ",
+                "((_event = 'loaded') ⋀ ((∄(_value) ⋀ ↲(ℛ(setResxValue, 'mainPage', mainContainer))) ⋁ ↲(ℛ(setResxValue, 'mainPage', baseNavi)))) ⋁ ",
+                "((_event = 'selected') ⋀ ↲(route('pageScaffold', {_item: _value})))"
+            ],
+            "dataLoading": [
+                "⋓({_child: Φ(ProgressText, {_text: 'Loading data with end to end encryption ....', _textStyle : ℛ(textStyle, Normal16)}), ",
+                "_alignment: decode(alignment, center)}) ⋀ ↲(ℛ(setResxValue, 'mainPage', mainContainer))"
+            ],
+            "crmPage": [
+                "_item, _value | mapPat(rowColHeader, (center, start, max, Ø)) ⋀ (_children ≔ [topCard, tabView]) ⋀ ",
+                "↲(ℛ(setResxValue, 'contactPage', Φ(ListView)))"
             ],
             "tapIconElem": [
                 "_icon, _text, _iconColor, _onTap, _tapAction | ⋓({_borderColor: ℛ(color, 'grey'), _borderWidth: 2.0, _width: ℛ(swratio, Ø, 0.25), _noShadow: true, ",
@@ -196,10 +238,46 @@
                 "(_child ≔ Φ(Column, {_children: [_i, Φ(Container)], _mainAxisAlignment: decode(mainAxisAlignment, spaceEvenly)})) ⋀ ",
                 "(_height ≔ (_width * 0.85)) ⋀ ↲(Φ(TapItem, {_child: Φ(ColorButton), _onTap: _onTap, _tapAction: _tapAction}))"
             ],
-            "pageAppBar": [
-                "_flexibleSpace, _title, _leading | (_child ≔ Φ(Text, {_text: _title, _textStyle: ℛ(textStyle, TopicTxtStyle)})) ⋀ ",
-                "(_child ≔ Φ(Center)) ⋀ (_flexibleSpace ≔ Φ(Container, {_decoration: ℛ(appRes, blueGradBD)}))⋀ ↲(Φ(Expanded))"
+            "pageScaffold": [
+                "_item | (_body ≔ pageBody) ⋀ ⋓({_title: pageAppBar, _leading: Φ(IconButton, ",
+                "{_icon: 'back', _iconColor: ℛ(color, 'white'), _onTap: createEvent(popRoute)})})⋀ ↲(scaffoldPat)"
             ],
+            "pageAppBar": [
+                "_flexibleSpace, _item | (_flexibleSpace ≔ Φ(Container, {_decoration: ℛ(appRes, blueGradBD)})) ⋀ ",
+                "↲(Φ(Text, {_text: _item['title'], _textStyle: ℛ(textStyle, TopicTxtStyle)}))"
+            ],
+            "pageBody": [
+                "_item | ℛ(setResxValue, 'contactPage', Φ(ProgressText, {_text: 'Loading data ....', _textStyle : ℛ(textStyle, Normal16)})) ⋀ ",
+                "(_r1 ≔ []) ⋀ (_r2 ≔ [('cf_kontakt')]) ⋀ ",
+                "(getSubview({_pageId: 7, _pageSubmote: _item['id'], _cols: [1,2], _refs: [_r1, _r2], _processEvent: createEvent(['crmPage', {_item: _item}])}))",
+                "↲(Φ(Obx, {_child: Φ(Container), _valueName: 'contactPage'}))"
+            ],
+            "tabView": [
+                "_value | ⋓({_data: _value[0], _pat: 'contactRow', _physics: ℛ(appRes, clampingScrollPhysics)}) ⋀ τ('contact row') ⋀ ",
+                "mapPat(rowColHeader, (center, start, max, Ø)) ⋀ ((∄(_value[0]) ⋀ (_c ≔ Φ(Container))) ⋁ ((_children ≔ itItems) ⋀ (_c ≔ Φ(ListView)))) ⋀ ",
+                "⋓({_data: _value[1], _pat: 'noticeRow'}) ⋀ τ('notice row') ⋀ ((∄(_value[1]) ⋀ (_n ≔ Φ(Container))) ⋁ ((_children ≔ itItems) ⋀ ",
+                "(_n ≔ Φ(ListView)))) ⋀ (_children ≔ [_c, _n]) ⋀ (_tabs ≔ [⊤('contact'), ⊤('notice')]) ⋀ τ('tab col') ⋀ ↲(Φ(TabColumn))"
+            ],
+            "topCard": [
+                "_item | cardConst ⋀ ⋓({_ed: Φ(Text, {_text: _item['entryDate'], _textStyle: _dec}), _tel: _item[cf_telefon]}) ⋀ ",
+                "((∄(_item[cf_zusatz]) ⋀ (_chi ≔ [])) ⋁ ((_chi ≔ [Φ(Text, {_text: _item[cf_zusatz], _textStyle: ℛ(textStyle, 'Bold20')})]))) ⋀ ",
+                "(_tName ≔ 'cf_adresse') ⋀ (_pat ≔ 'addAddr') ⋀ addPat ⋀ (∄(_chi) ⋁ (_chi ≪ _div)) ⋀ ",
+                "(∄(_tel) ⋁ ((_pref ≔ 'Tel') ⋀ (_chi ⊌ [telTile, _div]))) ⋀ (∄(_item['cf_homepage']) ⋁ ",
+                "(mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀  ⋀ (_h ≔ Φ(Text, {_text: _item['cf_homepage'], _textStyle: _dec})) ⋀ ",
+                "(_ih ≔ Φ(IconButton, {_onTap: createEvent(toUrl), _tapAction: _item[cf_homepage], _iconColor: 'btnBlue', _icon: 'website'})) ⋀ ",
+                "(_children ≔ [_h, _ih]) ⋀ (_child ≔ Φ(Row)) ⋀ (_chi ≪ (Φ(SizedBox))))) ⋀ ",
+                "(_tName ≔ 'cf_email') ⋀ addItem ⋀ (_chi ⊌ [_div, _ed]) ⋀ mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ",
+                "(_children ≔ _chi) ⋀ ⋓({_child: Φ(Padding, {_child: Φ(Column), _padding: ℛ(appRes, boxPadding)}), ",
+                "_elevation: ℛ(hratio, Ø, 0.01), _cardRadius: ℛ(hratio, Ø, 0.015)}) ⋀ ↲(Φ(SizedBox, {_child: Φ(Card), _width: ℛ(swratio, Ø, 0.995)}))"
+            ],
+            "addAddr": [
+                "_item, _dec, _chi | (_adr ≔ (_item['cf_plz'] + ' ' + _item['cf_ort'])) ⋀ ⋓({_a1: Φ(Text, {_text: _item['cf_adresse'], _textStyle: _dec}), ",
+                "_a2: Φ(Text, {_text: (_item['cf_land'] + ⊤(dash) + _adr + ' ' + ⊤(brac) + _item['cf_region'] + ⊤(ket)), _textStyle: _dec})}) ⋀ ",
+                "mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ (_addr ≔ (_item['cf_adresse'] + ⊤(comma) + ' ' + _adr)) ⋀ ",
+                "(_ic ≔ Φ(IconButton, {_onTap: createEvent(addrToMap), _tapAction: _addr, _iconColor: 'position', _icon: 'map'})) ⋀ ",
+                "(_children ≔ [_a1, _ic]) ⋀ (_child ≔ Φ(Row)) ⋀ (_ac ≔ Φ(SizedBox)) ⋀ ↲(_chi ⊌ [_ac, a2])"
+            ],
+            "cardConst": "_dec, _div, _height | ↲(⋓({_dec: ℛ(textStyle, Normal16), _div: Φ(Divider, {_thickness: 1.5}), _height: ℛ(hratio, Ø, 0.0468)}))",
             "testBox": "(_text ≔ ⊤(testText)) ⋀ (_child ≔ Φ(Text)) ⋀ ƒ(mapPat, (patHeader, (Ø, Ø, #FFFFFF, Ø, topCenter, Ø))) ⋀ ↲(Φ(Container))"
         }
     },

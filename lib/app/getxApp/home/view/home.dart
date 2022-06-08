@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:tryout/app/getxApp/detail/view/detail.dart';
 import 'package:tryout/app/getxApp/detail/view/paging.dart';
 import 'package:tryout/builder/pattern.dart';
@@ -15,7 +14,7 @@ getxAppInit() {
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key key}) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +42,7 @@ class HomeScreen extends StatelessWidget {
                 },
                 child: const Text('Go to detail'),
               ),
-              Divider(),
+              const Divider(),
               ElevatedButton(
                 style: style,
                 onPressed: () {
@@ -61,7 +60,7 @@ class HomeScreen extends StatelessWidget {
 class HomePattern extends ProcessPattern {
   HomePattern(Map<String, dynamic> map) : super(map);
   @override
-  Widget getWidget({String name}) {
+  Widget getWidget({String? name}) {
     return const HomeScreen();
   }
 }

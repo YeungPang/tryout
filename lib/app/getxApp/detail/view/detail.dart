@@ -4,7 +4,7 @@ import 'package:tryout/builder/pattern.dart';
 import 'package:tryout/util/map_util.dart';
 
 class DetailScreen extends StatelessWidget {
-  const DetailScreen({Key key}) : super(key: key);
+  const DetailScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class DetailScreen extends StatelessWidget {
 class DetailsPattern extends ProcessPattern {
   DetailsPattern(Map<String, dynamic> map) : super(map);
   @override
-  Widget getWidget({String name}) {
+  Widget getWidget({String? name}) {
     return const DetailScreen();
   }
 }
