@@ -6,9 +6,9 @@ import '../model/locator.dart';
 import 'package:string_validator/string_validator.dart';
 
 final re = RegExp(
-    r"[⋀⋁⊻∈⋓⋂∉⋃∄↲⊆⊂⊄≠=≈~⇒&∣|\*\-+－＋⁺⁻\/≁≪≫←→≥≤<>≔⊌⥹⥻⟷@,Φσℒℛℝℳ𝕄𝄁ƒ𝓅⋓ℓητ𝕥‥⊖:]");
+    r"[⋀⋁⊻∈⋓⋂∉⋃∄↲⊆⊂⊄≠=≈~⇒&∣|\*\-+－＋⁺⁻\/≁≪≫⋘⋙←→≥≤<>≔⊌⥹⥻⟷@,Φσℒℛℝℳ𝕄𝄁ƒ𝓅⋓ℓητ𝕥‥⊖:]");
 
-const binOp = "∈|@∉⊆⊂⊄≠=≈~⇒&∣⊻≪≫≥≤<>－＋⥹⥻→←⟷";
+const binOp = "∈|@∉⊆⊂⊄≠=≈~⇒&∣⊻≪≫≥≤<>－＋⥹⥻⋘⋙";
 const matrixSymbol = "𝔸𝔹ℂ𝔻𝔼𝔽𝕄ℝ𝕥𝄁";
 const matrixOp = "¯𝗑ᵀ﹒";
 
@@ -83,6 +83,9 @@ class LogicProcessor {
     List<String> sl = spec.split(RegExp(r"[,() ]"));
     List<dynamic> args = [];
     String type = '∃';
+    if (inVar != null) {
+      vars.addAll(inVar);
+    }
     if (sl.length > 1) {
       for (int i = 1; i < sl.length; i++) {
         String v = sl[i];
@@ -108,11 +111,11 @@ class LogicProcessor {
   }
 
   dynamic resolveDynList(List<dynamic> expr, {bool ret = true}) {
-    String retMulti = nil;
+/*     String retMulti = nil;
     if ((expr.isNotEmpty) && (expr[0] == '⊎')) {
       expr = expr[1];
       retMulti = '⊎';
-    }
+    } */
     if (expr.contains(",")) {
       return handleList(expr);
     }
@@ -229,17 +232,22 @@ class LogicProcessor {
           i = inx;
         }
         if (fail) {
-          varList = pr!.varList!;
-          predStack.removeLast();
-          if (predStack.isNotEmpty) {
-            pr = predStack.last;
-          }
-          if (varList.isNotEmpty) {
-            return varList;
+          if (pr!.varList!.isNotEmpty) {
+            vars = pr!.varList!.last;
+            i = expr.length;
+            r = true;
           } else {
+            predStack.removeLast();
+            if (predStack.isNotEmpty) {
+              pr = predStack.last;
+            }
+            // if (pr!.varList!.isNotEmpty) {
+            //   return pr!.varList;
+            // } else {
             debugPrint("Fail at: " + expr.toString());
             //return false;
             return r;
+            //}
           }
         }
       } else {
@@ -283,9 +291,9 @@ class LogicProcessor {
       }
     }
     if (ret) {
-      if (retMulti == '⊎') {
-        varList = pr!.varList!;
-      }
+      //if (retMulti == '⊎') {
+      varList = pr!.varList!;
+      //}
       var retObj = pr!.returnObj;
       String loop = (varList.isNotEmpty) ? pr!.loop : nil;
       predStack.removeLast();
@@ -388,41 +396,31 @@ class LogicProcessor {
     }
     dynamic clause;
     dynamic cls;
-    //bool setc = true;
-/*     if (clauses != null) {
-      cls = clauses![e];
-      setc = false;
-    } */
-    if (cls == null) {
-      //setc = true;
-      Map<String, dynamic>? myClauses = myProcess["clauses"];
-      if (myClauses != null) {
-        var mycls = myClauses[e];
-        if (mycls != null) {
-          List<dynamic> cList = [];
-          if (mycls is List<dynamic>) {
-            if (mycls[0] is String) {
-              mycls = mycls.join();
-            } else {
-              for (var v in mycls) {
-                String s = (v is List<dynamic>) ? v.join() : v;
-                Clause c = Clause(e, s, myProcess);
-                cList.add(c);
-              }
-              cls = (cList.length > 1) ? cList : cList[0];
+
+    //setc = true;
+    Map<String, dynamic>? myClauses = myProcess["clauses"];
+    if (myClauses != null) {
+      var mycls = myClauses[e];
+      if (mycls != null) {
+        List<dynamic> cList = [];
+        if (mycls is List<dynamic>) {
+          if (mycls[0] is String) {
+            mycls = mycls.join();
+          } else {
+            for (var v in mycls) {
+              String s = (v is List<dynamic>) ? v.join() : v;
+              Clause c = Clause(e, s, myProcess);
+              cList.add(c);
             }
+            cls = (cList.length > 1) ? cList : cList[0];
           }
-          if (cList.isEmpty) {
-            cls = Clause(e, mycls, myProcess);
-          }
+        }
+        if (cList.isEmpty) {
+          cls = Clause(e, mycls, myProcess);
         }
       }
     }
     if (cls != null) {
-/*       if (setc) {
-        clauses ??= {};
-        clauses![e] = cls;
-      } */
       String type = '';
       if (l != null) {
         type = '∃';
@@ -434,7 +432,7 @@ class LogicProcessor {
       }
       List<String>? s2 =
           (r2 != null) ? r2.map((er) => er as String).toList() : null;
-      if (cls is List<dynamic>) {
+/*       if (cls is List<dynamic>) {
         List<dynamic> cList = [];
         for (Clause c in cls) {
           if (c.match(type, s2, vars)) {
@@ -442,10 +440,10 @@ class LogicProcessor {
           }
         }
         clause = cList;
-      } else {
-        Clause c = cls;
-        clause = (c.match(type, s2, vars)) ? c : null;
-      }
+      } else { */
+      Clause c = cls;
+      clause = (c.match(type, s2, vars)) ? c : null;
+      //}
     }
     if (clause != null) {
       bool success = false;
@@ -453,8 +451,8 @@ class LogicProcessor {
       List<PredResult> mgoalStack = goalStack;
       List<PredResult> mpredStack = predStack;
       PredResult? mgr = gr;
-      int i = 0;
-      if (clause is List<dynamic>) {
+      //int i = 0;
+/*       if (clause is List<dynamic>) {
         List<dynamic> cvarList = [];
         for (Clause c in clause) {
           vars = c.vars;
@@ -489,23 +487,41 @@ class LogicProcessor {
           mpr!.vars = varList[0];
         }
         success = i > 0;
-      } else {
-        Clause c = clause;
-        vars = c.vars;
-        goalStack = [];
-        predStack = [];
-        varList = [];
-        pr = null;
-        gr = null;
-        r = resolveDynList(c.preds);
-        success = (r is bool) ? r : r != null;
-        if (success) {
-          if (c.clientVars != null) {
+      } else { */
+      Clause c = clause;
+      vars = c.vars;
+      goalStack = [];
+      predStack = [];
+      varList = [];
+      pr = null;
+      gr = null;
+      r = resolveDynList(c.preds);
+      success = (r is bool) ? r : r != null;
+      if (success) {
+/*           if (c.clientVars != null) {
             c.clientVars!.forEach((key, value) {
               mpr!.vars![key] = vars[value];
             });
+          } */
+        if (varList.isNotEmpty) {
+          List<dynamic> cvarList = varList;
+          varList = [];
+          for (Map<String, dynamic> v in cvarList) {
+            Map<String, dynamic> cvars = {};
+            cvars.addAll(mpr!.vars!);
+            if (c.inargs != null) {
+              for (String key in c.inargs!) {
+                cvars[key] = v[key];
+              }
+            }
+            varList.add(cvars);
+          }
+        } else if (c.inargs != null) {
+          for (String key in c.inargs!) {
+            mpr!.vars![key] = vars[key];
           }
         }
+        //}
       }
       var retObj = pr!.returnObj ?? success;
       pr = mpr;
@@ -541,7 +557,19 @@ class LogicProcessor {
       return null;
     }
     if ((e == 'ƒ') || (e == '𝓅')) {
-      List<dynamic> rl = handleList(l);
+      String name = l[0];
+      if (name[0] == '_') {
+        name = vars[name];
+      }
+      List<dynamic> rl = l;
+      rl.removeAt(0);
+      if (rl.isNotEmpty) {
+        rl = handleList(rl);
+        return model.appActions.doFunction(name, rl[0], vars);
+      } else {
+        return model.appActions.doFunction(name, null, vars);
+      }
+/*       List<dynamic> rl = handleList(l);
       int len = rl.length;
       switch (len) {
         case 1:
@@ -550,7 +578,7 @@ class LogicProcessor {
           return model.appActions.doFunction(rl[0], rl[1], vars);
         default:
           return null;
-      }
+      } */
       // Function getFunc = model.appActions.getFunction(rl[0]);
       // if (getFunc == null) {
       //   return null;
@@ -1164,7 +1192,7 @@ class Clause {
   final Map<String, dynamic> process;
   late Map<String, dynamic> vars;
   //Map<String, dynamic> rvars;
-  Map<String, dynamic>? clientVars;
+  //Map<String, dynamic>? clientVars;
   List<dynamic> preds = [];
   List<dynamic> varStack = [];
   String? type;
@@ -1196,7 +1224,7 @@ class Clause {
 
   bool match(String mtype, List<String>? margs, Map<String, dynamic> mVars) {
     init();
-    clientVars = null;
+    //clientVars = null;
     if ((margs == null) || (margs.isEmpty)) {
       if (argStr == null) {
         return true;
@@ -1224,10 +1252,10 @@ class Clause {
             vars[args[i]] = margs[i];
           }
         }
-        if (margs[i][0] == '_') {
+/*         if (margs[i][0] == '_') {
           clientVars ??= {};
           clientVars![margs[i]] = args[i];
-        }
+        } */
       } else {
         if (args[i][0] != '_') {
           return false;
@@ -1237,10 +1265,10 @@ class Clause {
         //   return false;
         // }
         vars[args[i]] = v;
-        if ((v == nil) || (v == null)) {
+/*         if ((v == nil) || (v == null)) {
           clientVars ??= {};
           clientVars![args[i]] = args[i];
-        }
+        } */
       }
     }
     return true;
@@ -1460,7 +1488,9 @@ List<dynamic> updatePredFunc(List<dynamic> predList) {
         if ((el is String) &&
             (el == '-') &&
             ((predList[i + 1] is int) || (predList[i + 1] is double)) &&
-            ((i == 0) || checkNeg.contains(predList[i - 1]))) {
+            ((i == 0) ||
+                ((predList[i - 1] is String) &&
+                    checkNeg.contains(predList[i - 1])))) {
           el = predList[i + 1] * -1;
           i++;
         }

@@ -25,10 +25,11 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/home", page: () => HomePage()),
         GetPage(name: "/page", page: () => _getPage(model)),
         GetPage(name: "/login", page: () => const LoginScreen()),
-        GetPage(name: "/sample", page: () => const SampleGroup()),
+        GetPage(name: "/sample", page: () => HomePage()),
+        //GetPage(name: "/sample", page: () => const SampleGroup()),
       ],
-      initialRoute: "/home",
-      //initialRoute: "/login",
+      //initialRoute: "/home",
+      initialRoute: "/login",
     );
   }
 

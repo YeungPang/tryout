@@ -97,9 +97,8 @@
                 "↲(Φ(IconButton, {_icon: 'menu', _iconColor: ℛ(color, 'white')}))"
             ],
             "mainBody": [
-                "login({_url: 'crm.sevconcept.ch', _email: ⊤(email), _pw: 'demouser123', _processEvent: createEvent(['crmfsm', {_event: 'loadData'}])}) ⋀ ",
-                "⋓({_child: Φ(ProgressText, {_text: 'Logging in ....', _textStyle : ℛ(textStyle, Normal16)}), _alignment: decode(alignment, center)}) ⋀ ",
-                "ℛ(setResxValue, 'mainPage', mainContainer) ⋀ ↲(page1)"
+                "getGroupList({_pageId: 6, _columnId: 1, _groupName: 'mainPage'}) ⋀ ",
+                "dataLoading ⋀ ℛ(setCache, 'mainPageEvent', createEvent(['crmfsm', {_event: 'loaded'}])) ⋀ ↲(page1)"
             ],
             "mainContainer": "_child, _alignment | ↲(Φ(Container, {_width: ℛ(swratio, Ø, 1.0), _height: ℛ(hratio, Ø, 0.8), _child: _child}))",
             "page1": [

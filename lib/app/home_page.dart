@@ -10,11 +10,12 @@ import '../agent/resx_controller.dart';
 import 'crmApp/crm_app.dart';
 import 'getxApp/home/view/home.dart';
 
-const String mainApp = "crm";
+const String mainApp = "crmlogin";
 final Map<String, dynamic> appMap = {
   "getX": ["assets/models/getx.json", getxAppInit],
   "xemino": ["assets/models/xemino.json", xeminoAppInit],
   "crm": ["assets/models/crm.json", crmAppInit],
+  "crmlogin": ["assets/models/crmlogin.json", crmAppInit],
 };
 
 class HomePage extends StatelessWidget {
