@@ -523,9 +523,9 @@ class IconButtonWidget extends StatelessWidget {
     } else {
       w = getPatternWidget(icv);
     }
-    Icon ic = w! as Icon;
+    //Icon ic = w! as Icon;
     return IconButton(
-      icon: ic,
+      icon: w!,
       padding: map["_padding"] ?? const EdgeInsets.all(8.0),
       onPressed: () => _onTap(context, map),
     );
@@ -1185,5 +1185,19 @@ class TabColumnPattern extends ProcessPattern {
   @override
   Widget getWidget({String? name}) {
     return TabColumnWidget(map);
+  }
+}
+
+class DrawerPattern extends ProcessPattern {
+  DrawerPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    Widget? w = getPatternWidget(map["_child"]);
+    Color c = Colors.blueGrey;
+    return Drawer(
+      backgroundColor: map["_backgroundColor"] ?? c,
+      width: map["_width"],
+      child: w,
+    );
   }
 }

@@ -1136,11 +1136,21 @@ ProcessPattern getTabColumnPattern(Map<String, dynamic> pmap) {
   return TabColumnPattern(map);
 }
 
+ProcessPattern getDrawerPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {
+    "_child": pmap["_child"],
+    "_backgroundColor": pmap["_backgroundColor"],
+    "_width": pmap["_width"],
+  };
+  return DrawerPattern(map);
+}
+
 final Map<String, Function> getPrimePattern = {
   "Align": getAlignPattern,
   "AppBar": getAppBarPattern,
   "Badge": getBadgePattern,
   "Divider": getDividerPattern,
+  "Drawer": getDrawerPattern,
   "Card": getCardPattern,
   "Center": getCenterPattern,
   "ClipRRect": getClipRRectPattern,

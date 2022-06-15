@@ -240,6 +240,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
+  maps_launcher:
+    dependency: "direct main"
+    description:
+      name: maps_launcher
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   matcher:
     dependency: transitive
     description:
@@ -563,11 +570,9 @@ packages:
   webxene_core:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "497e78d295d8d5ddb90eae29aeda5e5e48c6a407"
-      url: "https://github.com/pboswood/webxene_core"
-    source: git
+      path: "../webxene_core"
+      relative: true
+    source: path
     version: "0.0.1"
   win32:
     dependency: transitive

@@ -3,6 +3,7 @@ import 'package:tryout/app/getxApp/detail/view/detail.dart';
 import 'package:tryout/app/getxApp/detail/view/paging.dart';
 import 'package:tryout/builder/pattern.dart';
 import 'package:tryout/model/locator.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 
 getxAppInit() {
   Map<String, Function> pat = {
@@ -37,8 +38,9 @@ class HomeScreen extends StatelessWidget {
               ElevatedButton(
                 style: style,
                 onPressed: () {
-                  model.appActions.doFunction("route", "details", null);
+                  //model.appActions.doFunction("route", "details", null);
                   //Get.toNamed("details");
+                  MapsLauncher.launchQuery('Obere Vorstadt 40, 5001 Aarau');
                 },
                 child: const Text('Go to detail'),
               ),

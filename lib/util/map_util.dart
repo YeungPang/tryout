@@ -1,4 +1,5 @@
 import 'package:geocoding/geocoding.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MapUtil {
@@ -25,9 +26,10 @@ class MapUtil {
   }
 
   static Future<void> addrToMap(String addr) async {
-    String addrPlus = addr.replaceAll(' ', '+');
-    String googleMapUrl = "https://www.google.com/maps/place/" + addrPlus;
-    await launchUrlString(googleMapUrl);
+    MapsLauncher.launchQuery(addr);
+    // String addrPlus = addr.replaceAll(' ', '+');
+    // String googleMapUrl = "https://www.google.com/maps/place/" + addrPlus;
+    // await launchUrlString(googleMapUrl);
   }
 
   static Future<void> toTel(String telNo) async {

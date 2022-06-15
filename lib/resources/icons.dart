@@ -102,14 +102,28 @@ class IconPattern extends ProcessPattern {
   IconPattern(Map<String, dynamic> map) : super(map);
   @override
   Widget getWidget({String? name}) {
-    IconData? id = myIcons[map["_icon"]];
+    String iname = map["_icon"]!;
+    IconData? id = myIcons[iname];
     double size = map["_iconSize"] ?? 24.0 * model.sizeScale;
     var c = map["_iconColor"] ?? Colors.black;
     if (c is String) {
       c = colorMap[c];
     }
     Color color = c;
-    map["_widget"] ??= Icon(id, size: size, color: color);
+    if (map["_widget"] == null) {
+      if (id != null) {
+        map["_widget"] = Icon(id, size: size, color: color);
+      } else {
+        String? img = imgIcons[iname];
+        if (img != null) {
+          map["_widget"] = ImageIcon(
+            AssetImage(img),
+            color: color,
+            size: size,
+          );
+        }
+      }
+    }
     return map["_widget"];
   }
 }
@@ -181,4 +195,10 @@ const Map<String, IconData> myIcons = {
   "upload": SGIcons.upload,
   "website": Icons.language,
   "wrong": SGIcons.wrong,
+};
+
+const Map<String, String> imgIcons = {
+  "customer": "assets/images/contact_mail_black.png",
+  "contact": "assets/images/contacts_black.png",
+  "xeminologo": "assets/images/xeminologo.png",
 };

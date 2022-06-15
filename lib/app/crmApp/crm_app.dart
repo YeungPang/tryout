@@ -48,9 +48,10 @@ login(Map<String, dynamic> m) {
   });
 }
 
-Future<List<Mote>> _getGroup(
-    String? name, int targetPageId, int targetColumnId) async {
+Future<List<Mote>> _getGroup(Map<String, dynamic> m) async {
   try {
+    int targetPageId = m["_pageId"];
+    int targetColumnId = m["_columnId"];
     final myGroups = await AuthManager().loggedInUser.getSelfGroupsList();
     final myGroupsSelection = myGroups.firstWhere((g) => g.id == targetGroupId);
     final targetGroup = await GroupManager().fetchGroup(myGroupsSelection.id);
@@ -61,13 +62,7 @@ Future<List<Mote>> _getGroup(
     final targetColumn = fullPage.columns[targetColumnId]!;
     targetColumn.filters.clear();
     targetColumn.calculateMoteView();
-    if (name != null) {
-      Map<String, dynamic> dmap = {
-        "col": targetColumn,
-        "pageId": targetPage.id
-      };
-      resxController.setCache(name + "Cache", dmap);
-    }
+    m["col"] = targetColumn;
     final motes = targetColumn.getMoteViewPage(unpaginated: true);
     return motes;
   } catch (ex) {
@@ -76,8 +71,7 @@ Future<List<Mote>> _getGroup(
 }
 
 getGroupList(Map<String, dynamic> m) {
-  _getGroup(m["_groupName"], m["_pageId"], m["_columnId"])
-      .then((List<Mote> value) {
+  _getGroup(m).then((List<Mote> value) {
     _updateList(m, value);
   });
 }

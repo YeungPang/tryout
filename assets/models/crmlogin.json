@@ -5,6 +5,8 @@
     "text": {
         "abortTimer": "Zeitmessung abbrechen",
         "brac": "(",
+        "cat61": "6-1",
+        "cat71": "7-1",
         "colon": ":",
         "comma": ",",
         "contact": "Kontakte",
@@ -32,7 +34,8 @@
         "stopTimer": "Zeitmessung stoppen",
         "testText": "There is nothing yet!!!",
         "time": "Zeit:  ",
-        "title": "Titel"
+        "title": "Titel",
+        "xemino": "assets/images/xeminologo.png"
     },
     "config": {
         "contact": {
@@ -73,8 +76,12 @@
         "clauses": {
             "mainView": "setConfig(config, patterns) ⋀ ↲(mainScaffold)",
             "mainScaffold": [
-                "⋓({_text: ℛ(model, title), _key: key()}) ⋀ ",
-                "(_body ≔ mainBody) ⋀ ⋓({_title: mainAppBar, _leading: hamburgerMenu}) ⋀ ↲(scaffoldPat)"
+                "⋓({_text: ℛ(model, title), _key: key(), _width: ℛ(swratio, Ø, 0.25), _name: ⊤(xemino), _iconColor: ℛ(color, 'white')}) ⋀ ",
+                "⋓({_height: _width, _iconSize: (_width * 0.8)}) ⋀ (_child ≔ Φ(ImageAsset)) ⋀ (_ic1 ≔ Φ(SizedBox)) ⋀ ",
+                "⋓({_icon: 'customer', _tapAction: 'drawerfsm', _onTap: createEvent(['fsmEvent', {_pageId: 6, _titleName: ⊤('customer')}])}) ⋀ ",
+                "(_child ≔ Φ(IconButton)) ⋀ (_ic2 ≔ Φ(SizedBox)) ⋀ ⋓({_icon: 'contact', _onTap: createEvent(['fsmEvent', {_pageId: 22, _titleName: ⊤('contact')}])}) ⋀ ",
+                "(_child ≔ Φ(IconButton)) ⋀ (_ic3 ≔ Φ(SizedBox)) ⋀ mapPat(rowColHeader, (center, start, max, Ø)) ⋀ (_children ≔ [_ic1, _ic2, _ic3]) ⋀ ",
+                "(_drawer ≔ Φ(Drawer, {_child: Φ(Column), _width: _width})) ⋀ (_body ≔ mainBody) ⋀ ⋓({_title: mainAppBar}) ⋀ ↲(scaffoldPat)"
             ],
             "mainBottomBar": [
                 "_pageController, _pageNoti, _totalPages | ⋓({_inxIcon: Φ(Icon, {_icon: 'complete', _iconColor: 'btnBlue', ",
@@ -82,36 +89,35 @@
                 " _iconSize: 17.0})}) ⋀ ↲(Φ(PageBar))"
             ],
             "scaffoldPat": [
-                "_title, _child, _body, _key, _flexibleSpace, _leading, _bottomBar | ",
-                "mapPat(patHeader, (0.055, Ø, #FFFFFF, Ø, Ø, Ø)) ⋀ (_toolbarHeight ≔ ℛ(appBarHeight))",
-                "↲(Φ(Scaffold, {_bottomNavigationBar: _bottomBar, _appBar: Φ(AppBar), _body: _body}))"
+                "_title, _child, _body, _key, _flexibleSpace, _leading, _bottomBar, _drawer | ",
+                "mapPat(patHeader, (0.055, Ø, #FFFFFF, Ø, Ø, Ø)) ⋀ (_toolbarHeight ≔ ℛ(appBarHeight)) ⋀ ",
+                "(∄(_drawer) ⋀ ↲(Φ(Scaffold, {_bottomNavigationBar: _bottomBar, _appBar: Φ(AppBar), _body: _body}))) ⋁ ",
+                "↲(Φ(Scaffold, {_bottomNavigationBar: _bottomBar, _appBar: Φ(AppBar), _body: _body, _drawer: _drawer}))"
             ],
             "mainAppBar": [
                 "_text, _flexibleSpace | (_child ≔ Φ(Text, {_text: _text, _textStyle: ℛ(textStyle, Topic)})) ⋀ ",
                 "(_child ≔ Φ(Center)) ⋀ (_tText ≔ Φ(Expanded)) ⋀ (_iconColor ≔ ℛ(color, 'white')) ⋀ ",
-                "(_icon ≔ 'home') ⋀  (_ic1 ≔ Φ(IconButton)) ⋀ (_icon ≔ 'chat') ⋀ (_ic2 ≔ Φ(IconButton)) ⋀ (_icon ≔ 'settings') ⋀ ",
+                "(_icon ≔ 'search') ⋀  (_ic1 ≔ Φ(IconButton)) ⋀ (_icon ≔ 'chat') ⋀ (_ic2 ≔ Φ(IconButton)) ⋀ (_icon ≔ 'settings') ⋀ ",
                 "(_ic3 ≔ Φ(IconButton)) ⋀ (_ic ≔ Φ(Row, {_children: [_ic1, _ic2, _ic3], _mainAxisAlignment: decode(mainAxisAlignment, spaceEvenly)})) ⋀ ",
                 "(_flexibleSpace ≔ Φ(Container, {_decoration: ℛ(appRes, blueGradBD)})) ⋀ (_children ≔ [_tText, _ic]) ⋀ ↲(Φ(Row))"
             ],
             "hamburgerMenu": [
                 "↲(Φ(IconButton, {_icon: 'menu', _iconColor: ℛ(color, 'white')}))"
             ],
-            "mainBody": [
-                "getGroupList({_pageId: 6, _columnId: 1, _groupName: 'mainPage'}) ⋀ ",
-                "dataLoading ⋀ ℛ(setCache, 'mainPageEvent', createEvent(['crmfsm', {_event: 'loaded'}])) ⋀ ↲(page1)"
-            ],
+            "mainBody": "pagefsm({_pageId: 6, _titleName: ⊤('customer')}) ⋀ ↲(page1)",
             "mainContainer": "_child, _alignment | ↲(Φ(Container, {_width: ℛ(swratio, Ø, 1.0), _height: ℛ(hratio, Ø, 0.8), _child: _child}))",
             "page1": [
                 "_value | mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ ",
-                "(_tText ≔ Φ(Text, {_text: ⊤('customer'), _textStyle: ℛ(textStyle, Title)})) ⋀ ",
-                "⋓({_iconColor: 'grey700', _icon: 'plus', _iconSize: 20.0, _sd: Φ(SizedBox, {_width: ℛ(wratio, Ø, 0.03)})}) ⋀ (_ic1 ≔ Φ(IconText)) ⋀ (_tc ≔ ℛ(textController)) ⋀ ",
-                "(_ic3 ≔ Φ(IconText, {_icon: 'filter', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage', _textController: _tc}, _onTap: createEvent('filter')})) ⋀ ",
+                "(_tText ≔ Φ(Text, {_textStyle: ℛ(textStyle, Title)})) ⋀ (_oText ≔ (Φ(Obx, {_child: _tText, _valueName: 'titleName', _valueKey: '_text'}))) ⋀ ",
+                "(_tc ≔ ℛ(textController)) ⋀ (_fMap ≔ {_groupName: 'mainPage', _textController: _tc}) ⋀ (_fEvent ≔ createEvent('filter', _fMap)) ⋀ ",
+                "⋓({_iconColor: 'grey700', _icon: 'plus', _iconSize: 20.0, _sd: Φ(SizedBox, {_width: ℛ(wratio, Ø, 0.03)})}) ⋀ (_ic1 ≔ Φ(IconText)) ⋀ ",
+                "(_ic3 ≔ Φ(IconText, {_icon: 'filter', _iconSize: _iconSize,  _tapAction: _fMap, _onTap: _fEvent})) ⋀ ",
                 "(_ic4 ≔ Φ(IconText, {_icon: 'sortDown', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage'}, _onTap: createEvent('sort')})) ⋀ ",
                 "(_ic5 ≔ Φ(IconText, {_icon: 'sortUp', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage', _ascending: false}, _onTap: createEvent('sort')})) ⋀ ",
                 "(_ic6 ≔ Φ(IconText, {_icon: 'cached', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage'}, _onTap: createEvent('refresh')})) ⋀ ",
                 "(_children ≔ [_ic1, _sd, _ic3, _sd, _ic4, _sd, _ic5, _sd, _ic6]) ⋀ (_r ≔ Φ(Row)) ⋀ ",
-                "(_ft ≔ Φ(Container, {_child: Φ(InTextField, {_textController: _tc, _autofocus: false}), _width: ℛ(wratio, Ø, 0.32), _height: ℛ(hratio, Ø, 0.05)})) ⋀ ",
-                "(_children ≔ [_tText, _ft,  _r]) ⋀ (_sb ≔ Φ(Container, {_width: ℛ(wratio, Ø, 0.95), _child: Φ(Row)})) ⋀ ",
+                "(_ft ≔ Φ(Container, {_child: Φ(InTextField, {_textController: _tc, _autofocus: false, _complete: _fEvent}), _width: ℛ(wratio, Ø, 0.32), _height: ℛ(hratio, Ø, 0.05)})) ⋀ ",
+                "(_children ≔ [_oText, _ft,  _r]) ⋀ (_sb ≔ Φ(Container, {_width: ℛ(wratio, Ø, 0.95), _child: Φ(Row)})) ⋀ ",
                 "_mainPage ≔ Φ(Obx, {_child: Φ(Container), _valueName: 'mainPage'}) ⋀ ↲(Φ(Column, {_children: [_sb, _mainPage]}))"
             ],
             "baseNavi": [
@@ -215,9 +221,14 @@
             "timerExit": "↲(popRoute())",
             "timerService": "_value, _company | (_mtimer ≔ ℛ(getCache, ('timer' + _company))) ⋀ ↲(_mtimer ⊌ {_value: _value})",
             "timerAbort": "_company | ℛ(removeCache, ('timer' + _company)) ⋀ ↲(popRoute())",
+            "drawerfsm": "_pageId, _titleName | popRoute() ⋀ ↲(pagefsm)",
+            "pagefsm": [
+                "_pageId, _titleName | ℛ(setCache, 'mainPageCache', {_pageId: _pageId, _columnId: 1, _groupName: 'mainPage'}) ⋀ ",
+                "(_event ≔ 'loadData') ⋀ crmfsm ⋀ ↲(ℛ(setResxValue, 'titleName', _titleName))"
+            ],
             "crmfsm": [
-                "_event, _value | ((_event = 'loadData') ⋀ dataLoading ⋀ ",
-                "ℛ(setCache, 'mainPageEvent', createEvent(['crmfsm', {_event: 'loaded'}])) ⋀ ↲(getGroupList({_pageId: 6, _columnId: 1, _groupName: 'mainPage'}))) ⋁ ",
+                "_event, _value | ((_event = 'loadData') ⋀ dataLoading ⋀ (_m ≔ ℛ(getCache, 'mainPageCache')) ⋀ ",
+                "ℛ(setCache, 'mainPageEvent', createEvent(['crmfsm', {_event: 'loaded'}])) ⋀ ↲(getGroupList(_m))) ⋁ ",
                 "((_event = 'refresh') ⋀ ↲refresh({_groupName: 'mainPage'})) ⋁ ",
                 "((_event = 'loaded') ⋀ ((∄(_value) ⋀ ↲(ℛ(setResxValue, 'mainPage', mainContainer))) ⋁ ↲(ℛ(setResxValue, 'mainPage', baseNavi)))) ⋁ ",
                 "((_event = 'selected') ⋀ ↲(route('pageScaffold', {_item: _value})))"
@@ -238,8 +249,8 @@
                 "(_height ≔ (_width * 0.85)) ⋀ ↲(Φ(TapItem, {_child: Φ(ColorButton), _onTap: _onTap, _tapAction: _tapAction}))"
             ],
             "pageScaffold": [
-                "_item | (_body ≔ pageBody) ⋀ ⋓({_title: pageAppBar, _leading: Φ(IconButton, ",
-                "{_icon: 'back', _iconColor: ℛ(color, 'white'), _onTap: createEvent(popRoute)})})⋀ ↲(scaffoldPat)"
+                "_item | (_cat ≔ _item[categories]) ⋀ (((_cat[0] = ⊤(cat61)) ⋀ (_body ≔ pageBody)) ⋁ ((_cat[0] = ⊤(cat71)) ⋀ mapPat(rowColHeader, (center, start, max, Ø)) ⋀ (_children ≔ [contactRow]) ⋀ ",
+                "(_body ≔ Φ(ListView)))) ⋀ ⋓({_title: pageAppBar, _leading: Φ(IconButton, {_icon: 'back', _iconColor: ℛ(color, 'white'), _onTap: createEvent(popRoute)})})⋀ ↲(scaffoldPat)"
             ],
             "pageAppBar": [
                 "_flexibleSpace, _item | (_flexibleSpace ≔ Φ(Container, {_decoration: ℛ(appRes, blueGradBD)})) ⋀ ",

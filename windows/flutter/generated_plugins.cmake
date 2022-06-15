@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   flutter_js
+  maps_launcher
   url_launcher_windows
 )
 
