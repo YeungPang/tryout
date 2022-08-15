@@ -1,13 +1,18 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart';
 import 'package:get/get.dart';
+import 'package:tryout/resources/icons.dart';
 import './pattern.dart';
 import './std_pattern.dart';
 import '../model/locator.dart';
 import '../resources/basic_resources.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../resources/fonts.dart';
+import 'package:get/get.dart';
+import '../resources/basic_resources.dart';
 
 class DraggablePattern extends ProcessPattern {
   DraggablePattern(Map<String, dynamic> map) : super(map);
@@ -141,9 +146,14 @@ class InTextField extends StatelessWidget {
   _completeEdit(TextEditingController tc, BuildContext context) {
     String text = tc.text.toString();
     if (text.isNotEmpty) {
-      ProcessEvent? actions = map["_complete"];
+      dynamic actions = map["_complete"];
       if (actions != null) {
-        model.appActions.doFunction(actions.name, actions.map, actions.map);
+        if (actions is ProcessEvent) {
+          model.appActions.doFunction(actions.name, actions.map, actions.map);
+        } else if (actions is Map<String, dynamic>) {
+          model.appActions.doFunction(
+              actions["_func"], actions["_tapAction"], actions["_map"]);
+        }
       }
       bool clear = map["_clear"] ?? false;
       if (clear) {
@@ -254,11 +264,26 @@ class TapItem extends StatelessWidget {
   }
 }
 
-_onTap(BuildContext context, Map<String, dynamic> map) {
-  ProcessEvent? actionMap = map["_onTap"];
-  if (actionMap != null) {
+tapAction(Map<String, dynamic> map) {
+  _onTap(Get.context, map);
+}
+
+_onTap(BuildContext? context, Map<String, dynamic> map) {
+  dynamic onTap = map["_onTap"];
+  String? func;
+  dynamic m;
+  Map<String, dynamic>? _map;
+  if (onTap is Map<String, dynamic>) {
+    func = onTap["_func"];
+    m = onTap["_tapAction"];
+    _map = onTap["_map"];
+  } else if (onTap is ProcessEvent) {
+    func = onTap.name;
+    m = map["_tapAction"];
+    _map = onTap.map;
+  }
+  if (func != null) {
     GlobalKey? key = map["_key"];
-    dynamic m = map["_tapAction"];
     if (m is Map<String, dynamic>) {
       dynamic rxName = m["_rxName"];
       double op = (rxName == null) ? 1.0 : resxController.getRxValue(rxName);
@@ -267,7 +292,7 @@ _onTap(BuildContext context, Map<String, dynamic> map) {
       }
     }
     model.context = (key == null) ? context : key.currentContext;
-    model.appActions.doFunction(actionMap.name, m, actionMap.map);
+    model.appActions.doFunction(func, m, _map);
     //controller.model.context = null;
   }
 }
@@ -1153,7 +1178,7 @@ class _TabColumnWidget extends State<TabColumnWidget>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Expanded(
       child: Column(
         children: [
           TabBar(
@@ -1171,13 +1196,18 @@ class _TabColumnWidget extends State<TabColumnWidget>
           ),
         ],
       ),
-/*       constraints: BoxConstraints(
-          maxHeight: map["_height"] ?? model.scaleHeight * 0.95,
-          maxWidth: map["_width"] ?? model.scaleWidth), */
-      height: double.maxFinite,
-      width: map["_width"] ?? model.scaleWidth,
     );
   }
+}
+
+Size? getSize(GlobalKey? _key) {
+  if (_key == null) {
+    return null;
+  }
+  final RenderBox renderBox =
+      _key.currentContext?.findRenderObject() as RenderBox;
+
+  return renderBox.size;
 }
 
 class TabColumnPattern extends ProcessPattern {
@@ -1200,4 +1230,332 @@ class DrawerPattern extends ProcessPattern {
       child: w,
     );
   }
+}
+
+class FloatingActionPattern extends ProcessPattern {
+  FloatingActionPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    dynamic icon = map["_icon"];
+    if (icon is String) {
+      icon = IconPattern(map).getWidget();
+    }
+    Widget? w = icon ?? getPatternWidget(map["_child"]);
+    dynamic fgColor = map["_fgColor"];
+    if (fgColor is String) {
+      fgColor = colorMap[fgColor];
+    }
+    dynamic bgColor = map["_bgColor"];
+    if (bgColor is String) {
+      bgColor = colorMap[bgColor];
+    }
+    return FloatingActionButton(
+      child: w,
+      foregroundColor: fgColor,
+      backgroundColor: bgColor,
+      onPressed: () => _onTap(model.context, map),
+    );
+  }
+}
+
+class Bubble extends StatelessWidget {
+  final Map<String, dynamic> map;
+
+  const Bubble(this.map, {Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    model.context = context;
+    dynamic ml = map["_bubbleBox"];
+    dynamic lw = (ml! is List<Widget>)
+        ? ml
+        : (ml is List<dynamic>)
+            ? getPatternWidgetList(ml)
+            : getPatternWidget(ml);
+    Widget? w = getPatternWidget(map["_bubbleArrow"]);
+    return Align(
+        alignment: map["_align"],
+        child: Material(
+            type: MaterialType.transparency,
+            child: SizedBox(
+                height: map["_bubbleHeight"],
+                width: map["_boxWidth"],
+                child: Stack(children: [
+                  Align(
+                    alignment: map["_boxAlign"],
+                    child: Container(
+                        height: map["_boxHeight"],
+                        decoration: map["_boxDecoration"] ?? RCDecoration),
+                  ),
+                  Align(alignment: map["_arrowAlign"], child: w),
+                  Align(
+                      alignment: map["_boxAlign"],
+                      child: ClipRRect(
+                          borderRadius: BorderRadius.circular(size10),
+                          child: SizedBox(
+                            height: map["_boxHeight"],
+                            child: (lw is List<Widget>)
+                                ? Column(
+                                    mainAxisAlignment:
+                                        map["_mainAxisAlignment"] ??
+                                            MainAxisAlignment.start,
+                                    children: lw,
+                                  )
+                                : lw,
+                          )))
+                ]))));
+  }
+}
+
+class BubblePattern extends ProcessPattern {
+  BubblePattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    if (map["_widget"] == null) {
+      map["_widget"] = Bubble(map);
+    }
+    return map["_widget"];
+  }
+}
+
+ProcessPattern getMenuBubble(Map<String, dynamic> map) {
+  Map<String, dynamic> imap = {
+    "_height": 0.06 * model.scaleHeight,
+    "_name": "assets/images/menu_bubble.png",
+    "_boxFit": BoxFit.cover,
+  };
+  Function pf = model.appActions.getPattern("ImageAsset")!;
+  ProcessPattern arrow = pf(imap);
+  dynamic mBox = map["_menuBox"];
+  double boxHeight = map["_boxHeight"] ?? 0.0;
+  if ((mBox is! ProcessPattern) && (mBox is! Widget)) {
+    List<dynamic> menuBox = mBox ?? [];
+    if (menuBox.isNotEmpty) {
+      boxHeight = menuBox.length * 30.0 * sizeScale;
+    } else {
+      imap = {"_width": size20};
+      pf = model.appActions.getPattern("SizedBox")!;
+      Color c = const Color(0xFF1785C1);
+      imap = {
+        "_textStyle": mediumNormalTextStyle,
+        "_iconSize": size20,
+        "_iconColor": c,
+        "_highlightColor": c,
+        "_hoverColor": c,
+        "_gap": pf(imap),
+        "_horiz": true,
+        "_key": map["_key"],
+      };
+
+      pf = model.appActions.getPattern("IconText")!;
+      List<dynamic> menuList = map["_menuList"];
+      //ProcessEvent pe = ProcessEvent("menu");
+
+      for (String mStr in menuList) {
+        ProcessEvent pe = ProcessEvent("fsmEvent");
+        List<String> ls = mStr.split(";");
+        pe.map = {"_event": ls[0], "_title": ls[1]};
+        imap["_icon"] = ls[0];
+        imap["_text"] = ls[1];
+        imap["_onTap"] = pe;
+        //List<dynamic> ld = [ls[1], true];
+        imap["_tapAction"] = "menufsm";
+        menuBox.add(pf(imap));
+        boxHeight += 30.0 * sizeScale;
+      }
+      mBox = menuBox;
+    }
+  }
+  double boxWidth = map["_boxWidth"] ?? 0.50 * model.scaleWidth;
+  double ax = 1.0 - (41.1 / model.screenWidth);
+  imap = {
+    "_align": Alignment(ax, -0.85),
+    "_bubbleArrow": arrow,
+    "_bubbleBox": mBox,
+    "_bubbleHeight": 0.23399 * model.scaleHeight,
+    "_arrowAlign": const Alignment(0.9, -0.95),
+    "_boxAlign": Alignment.centerRight,
+    "_boxWidth": boxWidth,
+    "_mainAxisAlignment": MainAxisAlignment.spaceEvenly,
+    "_boxHeight": boxHeight,
+  };
+  pf = model.appActions.getPattern("Bubble")!;
+  return pf(imap);
+}
+
+class TextIconRow extends StatelessWidget {
+  final Map<String, dynamic> map;
+
+  const TextIconRow(this.map, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    dynamic icon = map["_icon"];
+    if ((icon != null) && (icon is! Widget)) {
+      icon = IconPattern(map).getWidget();
+    }
+    bool fitted = map["_fitted"] ?? false;
+    bool split = map["_split"] ?? false;
+    bool iconFirst = map["_iconFirst"] ?? false;
+    late Widget g;
+    if (split) {
+      Widget t = Expanded(
+          child: (fitted)
+              ? FittedBox(
+                  child: Text(map["_text"], style: map["_textStyle"]),
+                )
+              : Text(map["_text"], style: map["_textStyle"]));
+      Widget? ic = (icon != null)
+          ? GestureDetector(
+              onTap: () => _onTap(context, map),
+              child: icon,
+            )
+          : null;
+      g = Row(
+        children: (iconFirst) ? [ic!, t] : ((ic == null) ? [t] : [t, ic]),
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+      );
+    } else {
+      g = GestureDetector(
+          onTap: () => _onTap(context, map),
+          child: RichText(
+            text: (!iconFirst)
+                ? TextSpan(
+                    text: map["_text"] + "    ",
+                    style: map["_textStyle"],
+                    children: (icon != null)
+                        ? [
+                            WidgetSpan(
+                                child: icon,
+                                alignment: PlaceholderAlignment.middle),
+                          ]
+                        : null,
+                  )
+                : TextSpan(
+                    children: [
+                      WidgetSpan(
+                          child: icon, alignment: PlaceholderAlignment.middle),
+                      TextSpan(
+                        text: "    " + map["_text"],
+                        style: map["_textStyle"],
+                      )
+                    ],
+                  ),
+          ));
+      if (fitted) {
+        g = FittedBox(
+          child: g,
+        );
+      }
+    }
+    return g;
+  }
+}
+
+class TextIconRowPattern extends ProcessPattern {
+  TextIconRowPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    return TextIconRow(map);
+  }
+}
+
+class TextIconListPattern extends ProcessPattern {
+  List<Widget> children = [];
+
+  TextIconListPattern(Map<String, dynamic> map) : super(map);
+
+  setChildren() {
+    dynamic item = map["_item"];
+    Map<String, dynamic> entity = model.map["entity"];
+    String header = entity["header"];
+    var ent = map["_entity"];
+    Map<String, dynamic> me = {};
+    if (ent is List<dynamic>) {
+      for (String e in ent) {
+        getAttrMap(e, me, entity);
+      }
+    } else {
+      getAttrMap(ent, me, entity);
+    }
+    List<dynamic> aList = map["_attrList"];
+    Widget div = const Divider(
+      thickness: 1.5,
+    );
+    int d = 0;
+    int ta = 0;
+    for (var a in aList) {
+      if (a == "div") {
+        if (d > 0) {
+          children.add(div);
+          d = 0;
+        }
+      } else {
+        Map<String, dynamic>? ma = (a is Map<String, dynamic>) ? a : null;
+        String? name = (ma != null) ? ma["_attr"] : a;
+        String? attr;
+        dynamic data;
+        if (name != null) {
+          attr = me[name];
+          data = _getItemData(name, item);
+        }
+        if (((attr != null) && (data != null)) ||
+            ((ma != null) && (attr == null))) {
+          d++;
+          ta++;
+          Map<String, dynamic> m = (attr != null)
+              ? model.appActions.doFunction("patMap", [header, attr], null)
+              : {};
+          m.addAll(map);
+          if (ma != null) {
+            m.addAll(ma);
+          }
+          if (data != null) {
+            m["_text"] = (m["_prefix"] != null)
+                ? m["_prefix"] + data.toString()
+                : data.toString();
+          }
+          children.add(TextIconRow(m));
+        }
+      }
+    }
+    Map<String, dynamic>? rinfo = map["_rinfo"];
+    if (rinfo != null) {
+      rinfo["_total"] = ta;
+    }
+  }
+
+  @override
+  Widget getWidget({String? name}) {
+    return Column(
+      children: children,
+    );
+  }
+
+  dynamic _getItemData(String name, dynamic item) {
+    if (item is Map<String, dynamic>) {
+      return item[name];
+    }
+    if (item is List<dynamic>) {
+      for (Map<String, dynamic> it in item) {
+        dynamic data = it[name];
+        if (data != null) {
+          return data;
+        }
+      }
+    }
+    return null;
+  }
+}
+
+getAttrMap(String name, Map<String, dynamic> me, Map<String, dynamic> entity) {
+  Map<String, dynamic> attr = entity[name];
+  attr.forEach((key, value) {
+    if (key[0] == '_') {
+      String k = key.substring(1);
+      getAttrMap(k, me, entity);
+    } else {
+      me[key] = value;
+    }
+  });
 }

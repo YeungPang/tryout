@@ -226,7 +226,7 @@ Future<List<Mote>> _refresh(String name) async {
   try {
     Map<String, dynamic> dmap = resxController.getCache(name + "Cache");
     MoteColumn tCol = dmap["col"];
-    int pageId = dmap["pageId"];
+    int pageId = dmap["_pageId"];
     final fullPage =
         await GroupManager().fetchPageAndMotes(pageId, forceRefresh: true);
     final targetColumn = fullPage.columns[tCol.id]!;

@@ -76,6 +76,10 @@ class AgentActions extends AppActions {
           Get.back();
         }
         return true;
+      case "home":
+        Get.offAllNamed("/home");
+        return true;
+
       case "createEvent":
         if (input is List<dynamic>) {
           if (input.length == 2) {
@@ -125,6 +129,10 @@ class AgentActions extends AppActions {
           return true;
         }
         return false;
+      case "search":
+        Map<String, dynamic> m = vars ?? {};
+        onSearch(Get.context!, m);
+        return true;
       case "menu":
         String sel;
         //ValueNotifier<bool> noti;
@@ -205,6 +213,13 @@ class AgentActions extends AppActions {
           getPatternWidget(input)!,
           useSafeArea: true,
         );
+        return true;
+      case "showContextDialog":
+        showDialog(
+            context: model.context!,
+            builder: (BuildContext c) {
+              return getPatternWidget(input)!;
+            });
         return true;
       case "key":
         return GlobalKey();
@@ -353,7 +368,10 @@ class AgentActions extends AppActions {
       case "appBarHeight":
         return model.appBarHeight;
       case "model":
-        return model.map[spec];
+        if (value == null) {
+          return model.map[spec];
+        }
+        return model.map[spec][value];
       case "color":
         Color? c = colorMap[spec];
         if (c != null) {
@@ -361,6 +379,11 @@ class AgentActions extends AppActions {
         }
         return ThemeDecoder.decodeColor(spec, validate: false);
       case "textStyle":
+        if (value != null) {
+          Map<String, dynamic> m = value;
+          Color c = getResource("color", m["_color"]!);
+          return getTextStyle(c, m["_size"], m["_weight"]);
+        }
         return textStyle[spec];
       case "appRes":
         return resources[spec];
@@ -407,6 +430,8 @@ class AgentActions extends AppActions {
         return TextEditingController();
       case "function":
         return appFunc[spec];
+      case "text":
+        return text[spec];
       default:
         return resources[res];
     }
@@ -555,15 +580,19 @@ class ControlAgent extends Agent {
             if (s is String) {
               if (s[0] == '[') {
                 s = s.substring(1, s.length - 1);
-                List<dynamic> ls = s.split(',');
-                vars[k] = ls;
+                List<String> ls = s.split(',');
+                List<dynamic> ld = [];
+                for (int i = 0; i < ls.length; i++) {
+                  ld.add(resolveStr(ls[i]));
+                }
+                vars[k] = ld;
               } else if (s[0] == '{') {
                 s = s.substring(1, s.length - 1);
                 List<String> ls = s.split(',');
                 Map<String, dynamic> ms = {};
                 for (String es in ls) {
                   List<String> les = es.split(':');
-                  ms[les[0]] = les[1];
+                  ms[les[0]] = resolveStr(les[1]);
                 }
                 vars[k] = ms;
               } else {

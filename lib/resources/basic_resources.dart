@@ -100,6 +100,11 @@ final BoxShadow bs = BoxShadow(
     blurRadius: 5.0 * sizeScale,
     spreadRadius: 2.0);
 
+final BoxDecoration RCDecoration = BoxDecoration(
+  color: Colors.white,
+  borderRadius: BorderRadius.circular(size10),
+);
+
 final BoxDecoration shadowRCDecoration = BoxDecoration(
   color: Colors.white,
   boxShadow: [bs],
@@ -183,21 +188,21 @@ OutlineInputBorder _buildBorder(Color color) {
 
 InputDecorationTheme inputTheme() => InputDecorationTheme(
       //isDense: true,
-      floatingLabelBehavior: FloatingLabelBehavior.auto,
-      enabledBorder: _buildBorder(Colors.grey[600]!),
-      errorBorder: _buildBorder(Colors.red),
-      focusedErrorBorder: _buildBorder(Colors.red),
-      focusedBorder: _buildBorder(Colors.grey[600]!),
-      disabledBorder: _buildBorder(Colors.grey[400]!),
-      border: _buildBorder(Colors.grey[600]!),
+      //floatingLabelBehavior: FloatingLabelBehavior.auto,
+      // enabledBorder: _buildBorder(Colors.grey[600]!),
+      // errorBorder: _buildBorder(Colors.red),
+      // focusedErrorBorder: _buildBorder(Colors.red),
+      // focusedBorder: _buildBorder(Colors.grey[600]!),
+      // disabledBorder: _buildBorder(Colors.grey[400]!),
+      // border: _buildBorder(Colors.grey[600]!),
       labelStyle: faintTxtStyle,
       floatingLabelStyle: dragButnTxtStyle,
       helperStyle: resTxtStyle,
       hintStyle: dragButnTxtStyle,
       errorStyle: errTxtStyle,
       suffixStyle: mediumNormalTextStyle,
-      fillColor: Colors.grey[300],
-      filled: true,
+      // fillColor: Colors.grey[300],
+      // filled: true,
       focusColor: textColorFaint,
       hoverColor: textColorFaint,
       constraints: BoxConstraints(maxWidth: model.scaleWidth * 0.9),
@@ -207,3 +212,6 @@ ThemeData getMainTheme() => ThemeData(
       primarySwatch: Colors.blue,
       inputDecorationTheme: inputTheme(),
     );
+
+final RegExp pwre = RegExp(
+    r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");

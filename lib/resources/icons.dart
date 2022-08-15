@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../builder/pattern.dart';
 import '../model/locator.dart';
@@ -104,8 +105,9 @@ class IconPattern extends ProcessPattern {
   Widget getWidget({String? name}) {
     String iname = map["_icon"]!;
     IconData? id = myIcons[iname];
-    double size = map["_iconSize"] ?? 24.0 * model.sizeScale;
-    var c = map["_iconColor"] ?? Colors.black;
+    double size = map["_iconSize"] ?? 24.0;
+    size *= model.sizeScale;
+    var c = map["_iconColor"] ?? const Color(0xFF00344F);
     if (c is String) {
       c = colorMap[c];
     }
@@ -114,12 +116,18 @@ class IconPattern extends ProcessPattern {
       if (id != null) {
         map["_widget"] = Icon(id, size: size, color: color);
       } else {
-        String? img = imgIcons[iname];
-        if (img != null) {
+        String img = imgIcons[iname] ?? iname;
+        if (img.contains("http")) {
+          map["_widget"] = ImageIcon(
+            CachedNetworkImageProvider(img),
+            color: color,
+            size: size * 2.0,
+          );
+        } else {
           map["_widget"] = ImageIcon(
             AssetImage(img),
             color: color,
-            size: size,
+            size: size * 2.0,
           );
         }
       }
@@ -129,6 +137,7 @@ class IconPattern extends ProcessPattern {
 }
 
 const Map<String, IconData> myIcons = {
+  "add": Icons.add,
   "abort": Icons.cancel_presentation,
   "almost": SGIcons.almost,
   "answer": SGIcons.answer,
@@ -147,6 +156,7 @@ const Map<String, IconData> myIcons = {
   "complete": SGIcons.complete,
   "correct": SGIcons.correct,
   "correct_1": SGIcons.correct_1,
+  "edit": Icons.edit,
   "delete": SGIcons.delete,
   "filter": Icons.filter_alt_outlined,
   "friends": SGIcons.friends,
@@ -175,6 +185,7 @@ const Map<String, IconData> myIcons = {
   "quit_bubble_arrow": SGIcons.quit_bubble_arrow,
   "rate": SGIcons.rate,
   "recent": SGIcons.recent,
+  "required": FontAwesomeIcons.starOfLife,
   "response": SGIcons.response,
   "rightArrowFull": Icons.arrow_right_outlined,
   "save": Icons.save,

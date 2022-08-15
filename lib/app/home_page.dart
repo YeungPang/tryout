@@ -10,7 +10,7 @@ import '../agent/resx_controller.dart';
 import 'crmApp/crm_app.dart';
 import 'getxApp/home/view/home.dart';
 
-const String mainApp = "crmlogin";
+const String mainApp = "getX";
 final Map<String, dynamic> appMap = {
   "getX": ["assets/models/getx.json", getxAppInit],
   "xemino": ["assets/models/xemino.json", xeminoAppInit],
@@ -24,12 +24,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    model.init(context);
-    return _getWidget(context);
-  }
-
-  Widget _getWidget(BuildContext context) {
     if (model.stateData["mainWidget"] == null) {
+      model.init(context);
       String mainJson = appMap[mainApp][0];
       return FutureBuilder<String>(
           future: model.getJson(context, mainJson),

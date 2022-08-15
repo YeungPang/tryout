@@ -84,6 +84,7 @@ class ScaffolPattern extends ProcessPattern {
     Widget? bn = getPatternWidget(map["_bottomNavigationBar"]);
     Widget? d = getPatternWidget(map["_drawer"]);
     Widget? ed = getPatternWidget(map["_endDrawer"]);
+    Widget? f = getPatternWidget(map["_floatingAction"]);
     dynamic ml = map["_persistentFooterButtons"];
     List<Widget>? lw = (ml is List<Widget>)
         ? ml
@@ -105,7 +106,7 @@ class ScaffolPattern extends ProcessPattern {
           map['_endDrawerEnableOpenDragGesture'] ?? true,
       extendBody: map['_extendBody'] ?? false,
       extendBodyBehindAppBar: map['_extendBodyBehindAppBar'] ?? false,
-      floatingActionButton: map['_floatingActionButton'],
+      floatingActionButton: f,
       floatingActionButtonAnimator: map['_floatingActionButtonAnimator'],
       floatingActionButtonLocation: map['_floatingActionButtonLocation'],
       persistentFooterButtons: lw,
@@ -242,6 +243,7 @@ class ContainerPattern extends ProcessPattern {
   Widget getWidget({String? name}) {
     Widget? w = getPatternWidget(map["_child"]);
     return Container(
+        key: map["_key"],
         child: w,
         color: map["_color"],
         alignment: map["_alignment"],

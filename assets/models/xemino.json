@@ -87,7 +87,7 @@
             "mainBody": [
                 "_key, _pageController, _pageNoti, _totalPages | (_p1 ≔ Φ(Container, {_child: page1, _color: ℛ(color, 'lightGreyText')})) ⋀ ",
                 "(_p2 ≔ Φ(Container, {_color: ℛ(color, 'correct')})) ⋀ (_p3 ≔ Φ(Container, {_color: ℛ(color, 'incorrect')})) ⋀ ",
-                "(_children ≔ [_p1, _p2, _p3]) ⋀ (_totalPages ≔ η(_children)) ⋀ ↲(Φ(PageView))"
+                "(_children ≔ [_p1, _p2, _p3]) ⋀ (_totalPages ≔ #(_children)) ⋀ ↲(Φ(PageView))"
             ],
             "page1": [
                 "mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ (_s ≔ Φ(SizedBox, {_width: ℛ(wratio, Ø, 0.05)})) ⋀ ",
@@ -115,7 +115,7 @@
                 "(_ic ≔ Φ(IconButton, {_onTap: createEvent(addrToMap), _tapAction: _addr, _iconColor: 'position', _icon: 'map'})) ⋀ ",
                 "(_children ≔ [_a1, _ic]) ⋀ (_child ≔ Φ(Row)) ⋀ (_ac ≔ Φ(SizedBox)) ⋀ mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ",
                 "(_children ≔ [_cc, _n, _d, _ac, _a2, _d]) ⋀ (_children ⊌ itItems) ⋀  ⋓({_child: Φ(Padding, {_child: Φ(Column), _padding: ℛ(appRes, boxPadding)}), ",
-                "_elevation: ℛ(hratio, Ø, 0.01), _cardRadius: ℛ(hratio, Ø, 0.015)}) ⋀ (_h ≔ ((η(_children) - 7) * _height)) ⋀ ",
+                "_elevation: ℛ(hratio, Ø, 0.01), _cardRadius: ℛ(hratio, Ø, 0.015)}) ⋀ (_h ≔ ((#(_children) - 7) * _height)) ⋀ ",
                 "⋓({_child: Φ(Card), _width: ℛ(swratio, Ø, 0.95), _height: (ℛ(hratio, Ø, 0.35) + _h)}) ⋀ ↲(Φ(Container))"
             ],
             "itItems": "_data, _pat, _dec, _height | (_children ≔ []) ⋀ ((_item ∈ _data) ⋀ (_c  ≔ _pat) ⋀ (_children ≪ _c)) ⋀ ↲(_children)",

@@ -37,8 +37,10 @@ dependencies:
   string_validator: ^0.3.0
   json_theme:
   font_awesome_flutter:
-  flutter_svg: ^0.21.0-nullsafety.0
+  flutter_svg: ^1.1.0
   get: ^4.6.1
+  screenshot: ^1.2.3
+  path_provider: ^2.0.9
   url_launcher: ^6.0.20
   geocoding: ^2.0.4
   pull_to_refresh: ^2.0.0
@@ -46,6 +48,11 @@ dependencies:
   webcrypto: ^0.5.2
   tuple: ^2.0.0
   maps_launcher: ^2.0.1
+  shared_preferences:
+  cached_network_image: ^3.2.1
+  flutter_advanced_networkimage_2: ^2.0.1
+  share_plus: ^4.0.10
+  jiffy: ^5.0.0
   webxene_core:
     path: ../webxene_core
 

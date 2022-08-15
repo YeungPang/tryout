@@ -7,6 +7,9 @@ import '../resources/fonts.dart';
 
 class ItemSearch extends SearchDelegate<String> {
   final Map<String, dynamic> map;
+  String label = model.map["text"]["search"];
+  String? sType;
+  List<dynamic>? searchTypes;
   List<String>? itemList;
   //List<dynamic>? searchList;
   List<String>? refList;
@@ -14,17 +17,89 @@ class ItemSearch extends SearchDelegate<String> {
   ItemSearch(this.map);
 
   @override
-  List<Widget> buildActions(BuildContext context) {
-    Widget? iw = getPatternWidget(map["_clear"]);
-    if (iw != null) {
-      return [iw];
+  String get searchFieldLabel => _getLabel();
+
+  // @override
+  // ThemeData appBarTheme(BuildContext context) {
+  //   return Theme.of(context);
+  // }
+  String _getLabel() {
+    if ((searchTypes != null) || (map["_searchTypes"] == null)) {
+      return label;
     }
-    return [
-      IconButton(
-          onPressed: () {
+    if (searchTypes == null) {
+      var st = map["_searchTypes"];
+      if (st is String) {
+        searchTypes = st.split(';');
+      } else {
+        searchTypes = st;
+      }
+      sType = searchTypes![0];
+    }
+    label = model.map["text"][sType];
+    return label;
+  }
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    List<Widget>? iw = (map["_actions"] != null)
+        ? getPatternWidgetList(map["_actions"])
+        : null;
+    if (iw != null) {
+      return iw;
+    }
+    return _buildSearchTypes();
+  }
+
+  List<Widget> _buildSearchTypes() {
+    if (searchTypes == null) {
+      _getLabel();
+    }
+    Widget ib = IconButton(
+        onPressed: () {
+          query = '';
+        },
+        icon: const Icon(Icons.clear));
+    if ((searchTypes == null) || (searchTypes!.length == 1)) {
+      return [ib];
+    }
+    List<dynamic> menuBox = [];
+    double h = 30.0 * sizeScale;
+    for (String s in searchTypes!) {
+      String txt = model.map["text"][s];
+      Widget c = Container(
+        margin: EdgeInsets.symmetric(horizontal: model.size20),
+        alignment: Alignment.centerLeft,
+        child: Text(txt, style: mediumNormalTextStyle),
+        height: h,
+      );
+      Widget g = GestureDetector(
+          child: c,
+          onTap: () {
+            sType = s;
+            label = model.map["text"][sType];
             query = '';
-          },
-          icon: const Icon(Icons.clear))
+            model.appActions.doFunction("popRoute", null, null);
+          });
+      menuBox.add(g);
+    }
+    Function pf = model.appActions.getPattern("MenuBubble")!;
+    Map<String, dynamic> imap = {
+      "_menuBox": menuBox,
+      "_boxWidth": 0.40 * model.scaleWidth,
+    };
+    ProcessPattern pp = pf(imap);
+    return [
+      ib,
+      const VerticalDivider(
+        color: Colors.grey,
+      ),
+      IconButton(
+        icon: const Icon(Icons.more_vert),
+        onPressed: () {
+          model.appActions.doFunction("showDialog", pp, null);
+        },
+      )
     ];
   }
 
@@ -50,7 +125,8 @@ class ItemSearch extends SearchDelegate<String> {
   Widget _buildList(BuildContext context, bool closeIt) {
     itemList ??= map["_itemList"];
     if (itemList == null) {
-      itemList = [];
+      return Container();
+/*       itemList = [];
       refList = [];
       var itemStr = model.map["search"];
       String iStr = (itemStr is List<dynamic>) ? itemStr.join() : itemStr;
@@ -61,7 +137,7 @@ class ItemSearch extends SearchDelegate<String> {
           itemList!.add(sl[0]);
           refList!.add(sl[1]);
         }
-      }
+      } */
       //map["_searchElemList"] = model.map["match"]["element"];
     }
     final suggestions = itemList!.where((element) {

@@ -106,10 +106,10 @@
                 "_value | mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ ",
                 "(_tText ≔ Φ(Text, {_text: ⊤('customer'), _textStyle: ℛ(textStyle, Title)})) ⋀ ",
                 "⋓({_iconColor: 'grey700', _icon: 'plus', _iconSize: 20.0, _sd: Φ(SizedBox, {_width: ℛ(wratio, Ø, 0.03)})}) ⋀ (_ic1 ≔ Φ(IconText)) ⋀ (_tc ≔ ℛ(textController)) ⋀ ",
-                "(_ic3 ≔ Φ(IconText, {_icon: 'filter', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage', _textController: _tc}, _onTap: createEvent('filter')})) ⋀ ",
-                "(_ic4 ≔ Φ(IconText, {_icon: 'sortDown', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage'}, _onTap: createEvent('sort')})) ⋀ ",
-                "(_ic5 ≔ Φ(IconText, {_icon: 'sortUp', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage', _ascending: false}, _onTap: createEvent('sort')})) ⋀ ",
-                "(_ic6 ≔ Φ(IconText, {_icon: 'cached', _iconSize: _iconSize,  _tapAction: {_groupName: 'mainPage'}, _onTap: createEvent('refresh')})) ⋀ ",
+                "(_ic3 ≔ Φ(IconText, {_icon: 'filter', _iconSize: _iconSize,  _onTap: {_func: 'filter', _tapAction: {_groupName: 'mainPage', _textController: _tc}}})) ⋀ ",
+                "(_ic4 ≔ Φ(IconText, {_icon: 'sortDown', _iconSize: _iconSize, _onTap: {_func: 'sort',  _tapAction: {_groupName: 'mainPage'}}})) ⋀ ",
+                "(_ic5 ≔ Φ(IconText, {_icon: 'sortUp', _iconSize: _iconSize, _onTap: {_func: 'sort',  _tapAction: {_groupName: 'mainPage', _ascending: false}}})) ⋀ ",
+                "(_ic6 ≔ Φ(IconText, {_icon: 'cached', _iconSize: _iconSize, _onTap: {_func: 'refresh',  _tapAction: {_groupName: 'mainPage'}}})) ⋀ ",
                 "(_children ≔ [_ic1, _sd, _ic3, _sd, _ic4, _sd, _ic5, _sd, _ic6]) ⋀ (_r ≔ Φ(Row)) ⋀ ",
                 "(_ft ≔ Φ(Container, {_child: Φ(InTextField, {_textController: _tc, _autofocus: false}), _width: ℛ(wratio, Ø, 0.32), _height: ℛ(hratio, Ø, 0.05)})) ⋀ ",
                 "(_children ≔ [_tText, _ft,  _r]) ⋀ (_sb ≔ Φ(Container, {_width: ℛ(wratio, Ø, 0.95), _child: Φ(Row)})) ⋀ ",
@@ -121,7 +121,7 @@
             ],
             "textCard": [
                 "_item, _index, _tName | ⋓({_child: Φ(Text, {_text: _item[_tName], _textStyle: ℛ(textStyle, Normal16)}), _padding: ℛ(appRes, aboxPadding)}) ⋀ ",
-                "(_child ≔ Φ(Padding)) ⋀ ↲(Φ(TapItem, {_child: Φ(Card), _tapAction: 'crmfsm', _onTap: createEvent(['fsmEvent', {_event: 'selected', _value: _item}])}))"
+                "(_child ≔ Φ(Padding)) ⋀ ↲(Φ(TapItem, {_child: Φ(Card), _onTap: {_func: 'fsmEvent', _tapAction: 'crmfsm', _map: {_event: 'selected', _value: _item}])}}))"
             ],
             "contactRow": [
                 "_item | cardConst ⋀ (_chi ≔ [Φ(Text, {_text: _item['title'], _textStyle: ℛ(textStyle, Bold20)})]) ⋀ ",
@@ -147,18 +147,18 @@
             "textTile": "_item, _dec | ↲(Φ(Text, {_text: _item, _textStyle: _dec}))",
             "telTile": [
                 "_tel, _pref, _dec, _height | (_tText ≔ (_pref + ⊤(colon) + ' ' + _tel)) ⋀ (_t ≔ Φ(Text, {_text: _tText, _textStyle: _dec})) ⋀ ",
-                "(_ic ≔ Φ(IconButton, {_onTap: createEvent(toTel), _tapAction: _tel, _iconColor: 'red', _icon: 'phone'})) ⋀ ",
+                "(_ic ≔ Φ(IconButton, {_onTap: {_func: toTel, _tapAction: _tel}, _iconColor: 'red', _icon: 'phone'})) ⋀ ",
                 "mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ (_children ≔ [_t, _ic]) ⋀ (_child ≔ Φ(Row)) ⋀ ↲(Φ(SizedBox))"
             ],
             "textButtonTile": [
-                "_item, _dec | ⋓({_color: ℛ(color, 'greyText'), _width: (η(_item) * ℛ(sizeScale, Ø, 8.0)), ",
+                "_item, _dec | ⋓({_color: ℛ(color, 'greyText'), _width: (#(_item) * ℛ(sizeScale, Ø, 8.0)), ",
                 "_noShadow: true, _height: ℛ(size20), _textAlign: decode(textAlign, center)}) ⋀ ",
                 "_child ≔ Φ(Text, {_text: _item, _textStyle: ℛ(textStyle, faintTxtStyle)}) ⋀ ↲(Φ(ColorButton))"
             ],
             "timerDialog": [
                 "_company | (_event ≔ 'timer') ⋀ (timerUpdateStart) ⋀ (_compState ≔ ℛ(getCache, ('timer' + _company))) ⋀ (_value ≔ _compState['_value']) ⋀ ",
                 "(_state ≔ _compState['_state']) ⋀ (timerState) ⋀ ⋓({_children: timerItems, _icon: 'save', _iconColor: 'btnBlue', ",
-                "_onTap: createEvent(stopTimer), _tapAction: {_company: _company, _name: 'timerAbort'}}) ⋀ ",
+                "_onTap: {_func: stopTimer, _tapAction: {_company: _company, _name: 'timerAbort'}}}) ⋀ ",
                 "(_text ≔ ⊤(_icon + 'Timer')) ⋀ ⋓({_child: Φ(Padding, {_child: Φ(Column), _padding: ℛ(appRes, boxPadding)}), ",
                 "_elevation: ℛ(hratio, Ø, 0.01), _cardRadius: ℛ(hratio, Ø, 0.015), ",
                 "_icSet: tapIconElem, _icon: 'cancel', _iconColor: 'red', _text: ⊤('abortTimer')}) ⋀ ",
@@ -176,7 +176,7 @@
                 "⋓({_c: Φ(Text, {_text: _company, _textStyle: ℛ(textStyle, Title)}), _d: Φ(Text, {_text: ⊤('service'), _textStyle: _textStyle}), ",
                 "_dp: Φ(DropdownButton, {_items: services, _hint: ⊤('select one'), _cacheName: (_company + 'Service'), ",
                 "_textStyle: _textStyle, _value: _value, _fsmName: 'timerService', _inMap: {_company: _company}}), _di: Φ(Divider, {_thickness: 1.5}), ",
-                "_ic: Φ(IconButton, {_onTap: createEvent(stopTimer), _tapAction: {_company: _company, _name: 'timerExit'}, _iconColor: 'grey700', _icon: 'cancel', _iconSize: 16.0})}) ⋀ ",
+                "_ic: Φ(IconButton, {_onTap: {_func: stopTimer, _tapAction: {_company: _company, _name: 'timerExit'}}, _iconColor: 'grey700', _icon: 'cancel', _iconSize: 16.0})}) ⋀ ",
                 "(_dpr ≔ Φ(SizedBox, {_child: Φ(Row, {_children: [_d, _dp], _mainAxisAlignment: decode(mainAxisAlignment, spaceBetween)})})) ⋀ ",
                 "(_ac ≔ Φ(Row, {_children: [_ic], _mainAxisAlignment: decode(mainAxisAlignment, end)})) ⋀ (_children ≔ ([_c, _di, _dpr] ⊌ timerRows)) ⋀ ",
                 "(_se ≔ 'End') ⋀ (_rxName ≔ 'stopButton') ⋀ (_children ⊌ timerRows) ⋀ mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ",
@@ -185,12 +185,12 @@
             ],
             "timerRows": [
                 "_company, _se, _textStyle, _di, _rxName, _state | (((_se = 'Start') ⋀ ",
-                "(_ih ≔ Φ(IconButton, {_onTap: createEvent(startTimer), _tapAction: {_company: _company, _startName: 'timerStart', _duration: 2, _name: 'timerGo', _rxName: _rxName, _state: _state}, _iconColor: 'red', _icon: 'start'}))) ⋁ ",
-                "(_ih ≔ Φ(IconButton, {_onTap: createEvent(stopTimer), _tapAction: {_company: _company, _name: 'timerStop', _rxName: _rxName}, _iconColor: 'red', _icon: 'stop'}))) ⋀ ",
+                "(_ih ≔ Φ(IconButton, {_onTap: {_func: startTimer, _tapAction: {_company: _company, _startName: 'timerStart', _duration: 2, _name: 'timerGo', _rxName: _rxName, _state: _state}}, _iconColor: 'red', _icon: 'start'}))) ⋁ ",
+                "(_ih ≔ Φ(IconButton, {_onTap: {_func: stopTimer, _tapAction: {_company: _company, _name: 'timerStop', _rxName: _rxName}}, _iconColor: 'red', _icon: 'stop'}))) ⋀ ",
                 "⋓({_h: Φ(Text, {_text: ⊤(_se), _textStyle: _textStyle}), _height: ℛ(hratio, Ø, 0.05), ",
                 "_d: Φ(Text, {_text: ⊤('date'), _textStyle: _textStyle}), _t: Φ(Text, {_text: ⊤('time'), _textStyle: _textStyle}), ",
-                "_id: Φ(IconButton, {_onTap: createEvent(pickDate), _tapAction: {_event: ('date' + _se), _company: _company, _name: ('timerUpdate' + _se)}, _iconColor: 'btnBlue', _icon: 'calendar'}), ",
-                "_it: Φ(IconButton, {_onTap: createEvent(pickTime), _tapAction: {_event: ('time' + _se), _company: _company, _name: ('timerUpdate' + _se)}, _iconColor: 'btnBlue', _icon: 'pickTime'})}) ⋀ ",
+                "_id: Φ(IconButton, {_onTap: {_func: pickDate, _tapAction: {_event: ('date' + _se), _company: _company, _name: ('timerUpdate' + _se)}}, _iconColor: 'btnBlue', _icon: 'calendar'}), ",
+                "_it: Φ(IconButton, {_onTap: {_func: pickTime, _tapAction: {_event: ('time' + _se), _company: _company, _name: ('timerUpdate' + _se)}}, _iconColor: 'btnBlue', _icon: 'pickTime'})}) ⋀ ",
                 "(_dt ≔ Φ(Obx, {_child: Φ(Text), _valueKey: '_text', _valueName: ('date' + _se + _company)})) ⋀ ",
                 "(_tt ≔ Φ(Obx, {_child: Φ(Text), _valueKey: '_text', _valueName: ('time' + _se + _company)})) ⋀ ",
                 "(_dr ≔ Φ(Row, {_children: [_d, _dt]})) ⋀ (_tr ≔ Φ(Row, {_children: [_t, _tt]})) ⋀ ",
@@ -232,15 +232,15 @@
                 "↲(ℛ(setResxValue, 'contactPage', Φ(ListView)))"
             ],
             "tapIconElem": [
-                "_icon, _text, _iconColor, _onTap, _tapAction | ⋓({_borderColor: ℛ(color, 'grey'), _borderWidth: 2.0, _width: ℛ(swratio, Ø, 0.25), _noShadow: true, ",
+                "_icon, _text, _iconColor, _onTap | ⋓({_borderColor: ℛ(color, 'grey'), _borderWidth: 2.0, _width: ℛ(swratio, Ø, 0.25), _noShadow: true, ",
                 "_textAlign: decode(textAlign, center), _iconSize: 30.0}) ⋀ ",
                 "⋓({_child: Φ(Text), _i: Φ(Icon)}) ⋀ ",
                 "(_child ≔ Φ(Column, {_children: [_i, Φ(Container)], _mainAxisAlignment: decode(mainAxisAlignment, spaceEvenly)})) ⋀ ",
-                "(_height ≔ (_width * 0.85)) ⋀ ↲(Φ(TapItem, {_child: Φ(ColorButton), _onTap: _onTap, _tapAction: _tapAction}))"
+                "(_height ≔ (_width * 0.85)) ⋀ ↲(Φ(TapItem, {_child: Φ(ColorButton), _onTap: _onTap}))"
             ],
             "pageScaffold": [
                 "_item | (_body ≔ pageBody) ⋀ ⋓({_title: pageAppBar, _leading: Φ(IconButton, ",
-                "{_icon: 'back', _iconColor: ℛ(color, 'white'), _onTap: createEvent(popRoute)})})⋀ ↲(scaffoldPat)"
+                "{_icon: 'back', _iconColor: ℛ(color, 'white'), _onTap: {_func: popRoute}})})⋀ ↲(scaffoldPat)"
             ],
             "pageAppBar": [
                 "_flexibleSpace, _item | (_flexibleSpace ≔ Φ(Container, {_decoration: ℛ(appRes, blueGradBD)})) ⋀ ",
@@ -264,7 +264,7 @@
                 "(_tName ≔ 'cf_adresse') ⋀ (_pat ≔ 'addAddr') ⋀ addPat ⋀ (∄(_chi) ⋁ (_chi ≪ _div)) ⋀ ",
                 "(∄(_tel) ⋁ ((_pref ≔ 'Tel') ⋀ (_chi ⊌ [telTile, _div]))) ⋀ (∄(_item['cf_homepage']) ⋁ ",
                 "(mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀  ⋀ (_h ≔ Φ(Text, {_text: _item['cf_homepage'], _textStyle: _dec})) ⋀ ",
-                "(_ih ≔ Φ(IconButton, {_onTap: createEvent(toUrl), _tapAction: _item[cf_homepage], _iconColor: 'btnBlue', _icon: 'website'})) ⋀ ",
+                "(_ih ≔ Φ(IconButton, {_onTap: {_func: toUrl, _tapAction: _item[cf_homepage]}, _iconColor: 'btnBlue', _icon: 'website'})) ⋀ ",
                 "(_children ≔ [_h, _ih]) ⋀ (_child ≔ Φ(Row)) ⋀ (_chi ≪ (Φ(SizedBox))))) ⋀ ",
                 "(_tName ≔ 'cf_email') ⋀ addItem ⋀ (_chi ⊌ [_div, _ed]) ⋀ mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ",
                 "(_children ≔ _chi) ⋀ ⋓({_child: Φ(Padding, {_child: Φ(Column), _padding: ℛ(appRes, boxPadding)}), ",
@@ -274,7 +274,7 @@
                 "_item, _dec, _chi | (_adr ≔ (_item['cf_plz'] + ' ' + _item['cf_ort'])) ⋀ ⋓({_a1: Φ(Text, {_text: _item['cf_adresse'], _textStyle: _dec}), ",
                 "_a2: Φ(Text, {_text: (_item['cf_land'] + ⊤(dash) + _adr + ' ' + ⊤(brac) + _item['cf_region'] + ⊤(ket)), _textStyle: _dec})}) ⋀ ",
                 "mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ (_addr ≔ (_item['cf_adresse'] + ⊤(comma) + ' ' + _adr)) ⋀ ",
-                "(_ic ≔ Φ(IconButton, {_onTap: createEvent(addrToMap), _tapAction: _addr, _iconColor: 'position', _icon: 'map'})) ⋀ ",
+                "(_ic ≔ Φ(IconButton, {_onTap: {_func: addrToMap, _tapAction: _addr}, _iconColor: 'position', _icon: 'map'})) ⋀ ",
                 "(_children ≔ [_a1, _ic]) ⋀ (_child ≔ Φ(Row)) ⋀ (_ac ≔ Φ(SizedBox)) ⋀ ↲(_chi ⊌ [_ac, a2])"
             ],
             "cardConst": "_dec, _div, _height | ↲(⋓({_dec: ℛ(textStyle, Normal16), _div: Φ(Divider, {_thickness: 1.5}), _height: ℛ(hratio, Ø, 0.0468)}))",

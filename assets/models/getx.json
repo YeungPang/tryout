@@ -17,7 +17,6 @@
                 "verticalDirection"
             ],
             "male": [
-                "Yeung",
                 "Benjamin",
                 "Damian",
                 "Severin"
@@ -50,10 +49,25 @@
             }
         },
         "clauses": {
-            "mainView": "(_re ≔ setTest({_r: [], _n: 10})) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
-            "setTest": "_r, _n | ((∀(_m0) ∈ [1, -2, 3]) ⋀ τ('_m0') ⋀ (_m0 > 0) ⋀ ((∀(_m1) ∈ [4, -1, -2, 5]) ⋀ τ('_m1') ⋀ (_m1 < 0) ⋀ (_l ≔ [_m0, _m1])) ⋀ τ('_l') ⋀ (_r ≪ _l)) ⋀ τ('_n') ⋀ ↲(_r)",
+            "mainView": "(_te ≔ childrenOf['Yeung']) ⋀ (_te1 ≔ (_te ⥹ 2)) ⋀ τ('_te1') ⋀ (_te2 ≔ (_te ⥻ 3)) ⋀ (_re ≔ (_te － _te2)) ⋀ (((_te1 ⊂ _te) ⋀ τ('_te2')) ⋁ (true)) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "mainExist": "((∄(_re) ⋀ (_re ≔ 'a') ⋀ ∃(_re)) ⋁ (_re ≔ 'b')) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "mainAssign": "(_re ≔ {a: 'aaa', b: 'bbb', c: 'ccc'}) ⋀ (_re['b'] ≔ 'ddd') ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "mainText": "(_re ≔ ('aaa + ' + 'bbb * ' + \"ccc\")) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "mainTest": "(_re ≔ setTest({_r: [], _n: 10})) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "setTest": "_r, _n | ((∀(_m0) ∈ [1, -2, 3]) ⋀ τ('_m0') ⋀ (_m0 > 0) ⋀ ((∀(_m1) ∈ [4, -1, -2, 5]) ⋀  τ('_m1') ⋀ (_m1 < 0) ⋀ (_l ≔ [_m0, _m1])) ⋀ τ('_l') ⋀ (_r ≪ _l)) ⋀ τ('_n') ⋀ ↲(_r)",
             "details": "↲(Φ(getxDetails))",
-            "paging": "↲(Φ(getxPaging))"
+            "paging": "↲(Φ(getxPaging))",
+            "testChild": "(_re ≔ brotherOf({_y: 'Benjamin'})) ⋀ (_re ≔ parentOf({_child: 'Benjamin'}))",
+            "parentOf": [
+                "_child | (_pList ≔ []) ⋀ ((∀(_parent) ∈ childrenOf) ⋀ ",
+                "(_child ∈ childrenOf[_parent]) ⋀ (_pList ≪ _parent)) ⋀ ↲(_pList)"
+            ],
+            "brotherOf": [
+                "_y | (_bList ≔ []) ⋀ ((∀(_x) ∈ male) ⋀ (_x ≠ _y) ⋀ ",
+                "((∃(_p) ∈ parentOf({_child: _y})) ⋀ (_p ∈ parentOf({_child: _x}))) ⋀ (_bList ≪ _x)) ⋀ ",
+                "↲(_bList)"
+            ],
+            "isBrother": "_x, _y | ↲(_x ∈ brotherOf({_y: _y}))"
         }
     }
 }
