@@ -80,12 +80,34 @@ class LogicProcessor {
   LogicProcessor(this.myProcess);
 
   dynamic process(String spec, {Map<String, dynamic>? inVar}) {
+    //List<String> sl = spec.split(RegExp(r"[,() ]"));
+    //List<dynamic> args = [];
+    //String type = '∃';
     if (inVar != null) {
       vars.addAll(inVar);
     }
+/*     if (sl.length > 1) {
+      for (int i = 1; i < sl.length; i++) {
+        String v = sl[i];
+        if (v.isNotEmpty) {
+          args.add(v);
+          if (v[0] == '_') {
+            vars[v] = null;
+            type = '∀';
+          }
+        }
+      }
+    } */
     List<dynamic> expr = [spec];
+/*     var r = resolveDynList(expr);
+    bool fail = (r is bool) ? !r : r == null;
+    if (fail) {
+      return fail;
+    }
+    if ((r is bool) && (type == '∀') && (varList.isNotEmpty)) {
+      return varList;
+    } */
     return resolveDynList(expr);
-    ;
   }
 
   dynamic resolveDynList(List<dynamic> expr, {bool ret = true}) {

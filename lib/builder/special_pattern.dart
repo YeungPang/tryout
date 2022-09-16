@@ -13,6 +13,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../resources/fonts.dart';
 import 'package:get/get.dart';
 import '../resources/basic_resources.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 
 class DraggablePattern extends ProcessPattern {
   DraggablePattern(Map<String, dynamic> map) : super(map);
@@ -1303,6 +1304,19 @@ class Bubble extends StatelessWidget {
                                 : lw,
                           )))
                 ]))));
+  }
+}
+
+class SwitchPattern extends ProcessPattern {
+  SwitchPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    return FlutterSwitch(
+        value: map["_onOff"] ?? false,
+        onToggle: (value) {
+          map["_onOff"] = value;
+          _onTap(model.context, map);
+        });
   }
 }
 

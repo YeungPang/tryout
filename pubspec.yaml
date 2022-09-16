@@ -53,6 +53,7 @@ dependencies:
   flutter_advanced_networkimage_2: ^2.0.1
   share_plus: ^4.0.10
   jiffy: ^5.0.0
+  flutter_switch:
   webxene_core:
     path: ../webxene_core
 

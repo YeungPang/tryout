@@ -1249,6 +1249,14 @@ ProcessPattern getFloatingActionPattern(Map<String, dynamic> pmap) {
   return FloatingActionPattern(map);
 }
 
+ProcessPattern getSwitchPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {
+    "_onOff": pmap["_onOff"],
+    "_onTap": pmap["_onTap"]
+  };
+  return SwitchPattern(map);
+}
+
 final Map<String, Function> getPrimePattern = {
   "Align": getAlignPattern,
   "AppBar": getAppBarPattern,
@@ -1305,6 +1313,7 @@ final Map<String, Function> getPrimePattern = {
   "SizedBoxExpand": getSizedBoxExpandPattern,
   "Stack": getStackPattern,
   "SVGAsset": getSVGAssetPattern,
+  "Switch": getSwitchPattern,
   "TabColumn": getTabColumnPattern,
   "TapItem": getTapItemPattern,
   "TapListItem": getTapListItemPattern,

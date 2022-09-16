@@ -49,7 +49,13 @@
             }
         },
         "clauses": {
-            "mainView": "(_te ≔ childrenOf['Yeung']) ⋀ (_te1 ≔ (_te ⥹ 2)) ⋀ τ('_te1') ⋀ (_te2 ≔ (_te ⥻ 3)) ⋀ (_re ≔ (_te － _te2)) ⋀ (((_te1 ⊂ _te) ⋀ τ('_te2')) ⋁ (true)) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "mainView": "((∀(_re) ∈ [3‥1]) ⋀ τ('_re')) ⋀ ↲(Φ(getxHome))",
+            "mainAppend1": "append1([1,2], [3,4,5], _re) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "mainPassBack": "(_re ≔ 'a') ⋀ passBack ⋀ τ('_re') ⋀ τ('_y') ⋀ ↲(Φ(getxHome))",
+            "passBack": "_re, _y | (_re ≔ 'b') ⋀ (_y ≔ 'c')",
+            "mainAppend": "(_re ≔ append([1,2], [3,4,5])) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "append": "_x, _y | ((∃(_x) ⋀ (_x0 ≪ _x) ⋀ (_z ≔ append(_x, _y)) ⋀ τ('_x0') ⋀ τ('_z') ⋀ (_x0 ≫ _z)) ⋁ ((_z ≔ _y) ⋀ τ('_z'))) ⋀ ↲(_z)",
+            "append1": "_x, _y, _z | (∃(_x) ⋀ (_x0 ≪ _x) ⋀ append1(_x, _y, _z) ⋀ τ('_x0') ⋀ τ('_z') ⋀ ↲(_x0 ≫ _z)) ⋁ ((_z ≔ _y) ⋀ ↲(τ('_z')))",
             "mainExist": "((∄(_re) ⋀ (_re ≔ 'a') ⋀ ∃(_re)) ⋁ (_re ≔ 'b')) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
             "mainAssign": "(_re ≔ {a: 'aaa', b: 'bbb', c: 'ccc'}) ⋀ (_re['b'] ≔ 'ddd') ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
             "mainText": "(_re ≔ ('aaa + ' + 'bbb * ' + \"ccc\")) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
@@ -64,10 +70,14 @@
             ],
             "brotherOf": [
                 "_y | (_bList ≔ []) ⋀ ((∀(_x) ∈ male) ⋀ (_x ≠ _y) ⋀ ",
-                "((∃(_p) ∈ parentOf({_child: _y})) ⋀ (_p ∈ parentOf({_child: _x}))) ⋀ (_bList ≪ _x)) ⋀ ",
+                "((∃(_p) ∈ parentOf(_y)) ⋀ (_p ∈ parentOf(_x))) ⋀ (_bList ≪ _x)) ⋀ ",
                 "↲(_bList)"
             ],
-            "isBrother": "_x, _y | ↲(_x ∈ brotherOf({_y: _y}))"
+            "isBrother": "_x, _y | ↲(_x ∈ brotherOf(_y))",
+            "printText": "printX('a') ⋀ printX3('a', 'b', 'c') ⋀ ↲(Φ(getxHome))",
+            "childrenOf": "(_te ≔ childrenOf['Yeung']) ⋀ (_te1 ≔ (_te ⥹ 2)) ⋀ τ('_te1') ⋀ (_te2 ≔ (_te ⥻ 3)) ⋀ (_re ≔ (_te － _te2)) ⋀ (((_te1 ⊂ _te) ⋀ τ('_te2')) ⋁ (true)) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "setListTest": "(_te ≔ {1, 2, 3, 4, 5, 6, 7}) ⋀ (_te1 ≔ (_te ⥹ 2)) ⋀ τ('_te1') ⋀ (_te2 ≔ (_te ⥻ 3)) ⋀ (_re ≔ (_te ⊖ _te2)) ⋀ (((_te1 ⊂ _te) ⋀ τ('_te2')) ⋁ (true)) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
+            "listInxTest": "(_te ≔ [1, 2, 3, 4, 5, 6, 7]) ⋀ (_te1 ≔ (_te ⥹ 2)) ⋀ τ('_te1') ⋀ (_te2 ≔ (_te ⥻ 3)) ⋀ (_re ≔ (_te － _te2)) ⋀ (_te2[1] ≫ _te1[1]) ⋀ (((_te1 ⊂ _te) ⋀ τ('_te2')) ⋁ (true)) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))"
         }
     }
 }

@@ -7,6 +7,7 @@ import 'package:string_validator/string_validator.dart';
 
 final Map<String, dynamic> facts = model.map["patterns"]["facts"];
 final Map<String, dynamic> clauses = model.map["patterns"]["clauses"];
+final Map<String, dynamic> schema = model.map["schema"];
 
 class ConfigAgent {
   String? defName;

@@ -63,7 +63,7 @@ class AgentActions extends AppActions {
         return null;
       case "route":
         String screen = (input is List<dynamic>) ? input[0] : input;
-        Map<String, dynamic> m =
+        Map<String, dynamic>? m =
             ((input is List<dynamic>) && (input.length > 1)) ? input[1] : vars;
         Get.toNamed("/page?screen=" + screen, arguments: m);
         //Navigator.pushNamed(model.context, input, arguments: {"map": vars});
@@ -320,19 +320,112 @@ class AgentActions extends AppActions {
         } else {
           return true;
         }
+      case "processNewClause":
+        clauses[input[0]] = input[1];
+        ProcessEvent pe = ProcessEvent(input[0], map: vars);
+        Agent a = getAgent("pattern");
+        return a.process(pe);
       default:
-        if ((facts[name] != null) || (clauses[name] != null)) {
-          ProcessEvent pe = ProcessEvent(name, map: input);
+        List<dynamic>? f = facts[name];
+        if ((f != null) &&
+            (input is List<dynamic>) &&
+            (f.length == input.length)) {
+          for (int i = 0; i < input.length; i++) {
+            if ((input[i] is! String)) {
+              return false;
+            }
+            String s = input[i];
+            if (s[0] == '_') {
+              vars![s] = f[i];
+            } else {
+              if (s != f[i]) {
+                return false;
+              }
+            }
+          }
+          return true;
+        }
+        dynamic c = clauses[name];
+        if (c != null) {
+          if ((input is! Map<String, dynamic>) && (input != null)) {
+            ProcessEvent pe = ProcessEvent(name, map: {});
+            String s = (c is List<dynamic>) ? c[0] : c;
+            int inx = s.indexOf('|');
+            if (inx < 0) {
+              return false;
+            }
+            s = s.substring(0, inx);
+            List<String> sl = s.split(',');
+            if (input is List<dynamic>) {
+              if (input.length > sl.length) {
+                return false;
+              }
+              for (int i = 0; i < input.length; i++) {
+                String si = sl[i].trim();
+                if (si[0] == '_') {
+                  if ((input[i] is! String) || (input[i][0] != '_')) {
+                    pe.map![si] = input[i];
+                  }
+                } else if (input[i] is String) {
+                  if ((input[i][0] != '_') && (si != input[i])) {
+                    return false;
+                  } /*  else {
+                    pe.map![si] = nil;
+                  } */
+                }
+              }
+            } else {
+              String si = sl[0].trim();
+              if (si[0] == '_') {
+                if ((input is! String) || (input[0] != '_')) {
+                  pe.map![si] = input;
+                }
+              } else if (input is String) {
+                if ((input[0] != '_') && (si != input)) {
+                  return false;
+                } /* else {
+                  pe.map![si] = nil;
+                } */
+              }
+            }
+            Agent a = getAgent("pattern");
+            dynamic r = a.process(pe);
+            if ((r != null) && (r != false)) {
+              if (input is List<dynamic>) {
+                for (int i = 0; i < input.length; i++) {
+                  if ((input[i] is String) && (input[i][0] == '_')) {
+                    String si = sl[i].trim();
+                    vars![input[i]] = (si[0] == '_') ? pe.map![si] : si;
+                  }
+                }
+              } else {
+                if ((input is String) && (input[0] == '_')) {
+                  String si = sl[0].trim();
+                  vars![input] = (si[0] == '_') ? pe.map![si] : si;
+                }
+              }
+            }
+            return r;
+          }
           Agent a = getAgent("pattern");
+          ProcessEvent pe = ProcessEvent(name, map: input);
           return a.process(pe);
         }
         Function? func = appFunc[name];
         if (func != null) {
           dynamic r;
-          if (input != null) {
-            r = func(input);
+          if (input is List<dynamic>) {
+            if (input.isEmpty) {
+              r = func();
+            } else {
+              r = Function.apply(func, input);
+            }
           } else {
-            r = func();
+            if (input != null) {
+              r = func(input);
+            } else {
+              r = func();
+            }
           }
           return (r != null) ? r : true;
         }
@@ -363,6 +456,15 @@ class AgentActions extends AppActions {
 
   @override
   dynamic getResource(String res, String? spec, {dynamic value}) {
+    if (res == "textStyleColor") {
+      if (value != null) {
+        Color c = getResource("color", spec!);
+        TextStyle ts = value!;
+        ts = ts.copyWith(color: c);
+        return ts;
+      }
+      return null;
+    }
     String _res = (res.contains("Color")) ? "color" : res;
     switch (_res) {
       case "appBarHeight":
@@ -404,6 +506,12 @@ class AgentActions extends AppActions {
         return model.screenWidth * (value as double);
       case "sizeScale":
         return sizeScale * (value as double);
+      case "vertPadding":
+        return EdgeInsets.symmetric(vertical: value);
+      case "horzPadding":
+        return EdgeInsets.symmetric(horizontal: value);
+      case "boxPadding":
+        return EdgeInsets.all(value);
       case "size5":
         return model.size5;
       case "size10":
@@ -432,6 +540,8 @@ class AgentActions extends AppActions {
         return appFunc[spec];
       case "text":
         return text[spec];
+      case "schema":
+        return schema[spec];
       default:
         return resources[res];
     }
@@ -488,12 +598,12 @@ class ControlAgent extends Agent {
           lp.vars.addAll(event.map!);
         }
         var r = lp.process(event.name);
-        if ((event.map != null) && (event.map!.length < lp.vars.length)) {
+        if ((event.map != null) && (event.map!.length <= lp.vars.length)) {
           List<String> l = lp.vars.keys.toList();
           for (String k in l) {
-            if (event.map![k] == null) {
-              event.map![k] = lp.vars[k];
-            }
+            //if (event.map![k] == null) {
+            event.map![k] = lp.vars[k];
+            //}
           }
         }
         return r;

@@ -1,0 +1,7 @@
+{
+    "mainBottomBar": [
+        "_pageController, _pageNoti, _totalPages | ⋓({_inxIcon: Φ(Icon, {_icon: 'complete', _iconColor: 'btnBlue', ",
+        " _iconSize: 17.0}), _nonInxIcon: Φ(Icon, {_icon: 'incomplete', _iconColor: 'btnBlue', ",
+        " _iconSize: 17.0})}) ⋀ ↲(Φ(PageBar))"
+    ]
+}

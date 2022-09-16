@@ -7,11 +7,18 @@ import 'package:maps_launcher/maps_launcher.dart';
 
 getxAppInit() {
   Map<String, Function> pat = {
+    "printX": printX,
+    "printX3": printX3,
     "getxHome": getHomePattern,
     "getxDetails": getDetailsPattern,
     "getxPaging": getPagingPattern,
   };
   model.appActions.addPatterns(pat);
+  Map<String, Function> func = {
+    "printX": printX,
+    "printX3": printX3,
+  };
+  model.appActions.addFunctions(func);
 }
 
 class HomeScreen extends StatelessWidget {
@@ -69,4 +76,12 @@ class HomePattern extends ProcessPattern {
 
 ProcessPattern getHomePattern(Map<String, dynamic> pmap) {
   return HomePattern(pmap);
+}
+
+printX(String x) {
+  debugPrint(x);
+}
+
+printX3(String x1, String x2, String x3) {
+  debugPrint([x1, x2, x3].toString());
 }
