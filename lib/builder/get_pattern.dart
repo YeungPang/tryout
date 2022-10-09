@@ -115,6 +115,7 @@ ProcessPattern getAppBarPattern(Map<String, dynamic> pmap) {
   List<String> nl = [
     "_actions",
     "_actionsIconTheme",
+    "_automaticallyImplyLeading",
     "_backgroundColor",
     "_bottom",
     "_bottomOpacity",

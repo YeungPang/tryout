@@ -103,7 +103,7 @@ class ImageBannerPattern extends ProcessPattern {
 class InTextField extends StatelessWidget {
   final Map<String, dynamic> map;
 
-  InTextField(this.map, {Key? key}) : super(key: key);
+  const InTextField(this.map, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -257,7 +257,7 @@ class ValueChildContainerPattern extends ProcessPattern {
 class TapItem extends StatelessWidget {
   final Map<String, dynamic> map;
 
-  TapItem(this.map, {Key? key}) : super(key: key);
+  const TapItem(this.map, {Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     Widget? w = getPatternWidget(map["_child"]);
@@ -1047,7 +1047,7 @@ class DropdownButtonPattern extends ProcessPattern {
 class ProgressText extends StatelessWidget {
   final Map<String, dynamic> map;
 
-  ProgressText(this.map, {Key? key}) : super(key: key);
+  const ProgressText(this.map, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

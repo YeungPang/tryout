@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../resources/basic_resources.dart';
 import '../model/locator.dart';
 import '../builder/pattern.dart';
 import 'dart:math';
@@ -118,7 +119,11 @@ class ConfigAgent {
         if ((si is int) && (map != null)) {
           List<dynamic> ds2 = [];
           for (List<dynamic> ld in ds1) {
-            ds2.add(ld[si]);
+            var rs = ld[si];
+            if ((rs is String) && (rs[0] == '[')) {
+              rs = getListContent(rs, map, vars, rowList, header);
+            }
+            ds2.add(rs);
           }
           return ds2;
         }
@@ -134,7 +139,9 @@ class ConfigAgent {
     }
     int inx = ls.length - 1;
     String? s1 = (ls.length > 1) ? ls[inx].trim() : null;
-    var si2 = (s1 == null) ? null : ((s1[0] == '_') ? (vars[s1] ?? s1) : s1);
+    var si2 = ((s1 == null) || (s1.isEmpty))
+        ? null
+        : ((s1[0] == '_') ? (vars[s1] ?? s1) : s1);
     if (si2 is String) {
       si2 = resolveStr(si2);
     }
@@ -145,14 +152,31 @@ class ConfigAgent {
         hl = (h is String) ? h.split(';') : h;
         header.addAll(hl);
       }
-      List<dynamic> ld = map["elemList"][si];
+      var vld = map["elemList"][si];
+      List<dynamic>? ld;
+      if (vld is List<dynamic>) {
+        ld = vld;
+      } else if (vld is String) {
+        if (vld[0] == '[') {
+          vld = vld.substring(1, vld.length - 1);
+          ld = getListData(vld);
+        } else if (vld.contains(';')) {
+          ld = vld.split(';');
+        } else {
+          ld = [vld];
+        }
+      }
       if (rowList != null) {
         rowList.add(si);
       }
       if ((ls.length > 1) && (si2 is int)) {
-        return ld[si2];
+        var rs = ld![si2];
+        if ((rs is String) && (rs[0] == '[')) {
+          rs = getListContent(rs, map, vars, rowList, header);
+        }
+        return rs;
       }
-      return ld;
+      return ld!;
     }
     if (ls.length > 1) {
       List<dynamic> ds1 = [si, si2];
@@ -359,6 +383,14 @@ List<dynamic>? getDataList(Map<String, dynamic> m, var ielem) {
       for (int i = inx; i < elem.length; i++) {
         var einx = elem[i];
         if (einx is String) {
+          String iinx = einx.trim();
+          if (iinx[0] == 'ℛ') {
+            iinx = iinx.substring(2, iinx.length - 1);
+          }
+          int? ii = int.tryParse(iinx);
+          einx = ii ?? iinx;
+        }
+        if (einx is String) {
           List<int> il = resolveIntList(einx.trim());
           int ri = getRandom(il.length, excl)!;
           excl.add(ri);
@@ -558,10 +590,12 @@ List<dynamic>? mapList(List<int> inxList, List<dynamic> list) {
   return mapList;
 }
 
-List<dynamic>? resolveList(List<dynamic> list, Map<String, dynamic> vars) {
+List<dynamic>? resolveList(List<dynamic> list, Map<String, dynamic> vars,
+    {ConfigAgent? configAgent}) {
   List<dynamic> rList = [];
   for (var e in list) {
     var v = ((e is String) && (e[0] == '_')) ? vars[e] : e;
+    v = (v is String) ? v.trim() : v;
     if ((v is String) && (v.contains('‥'))) {
       List<String> ls = v.split('‥');
       if (ls.length != 2) {
@@ -582,6 +616,21 @@ List<dynamic>? resolveList(List<dynamic> list, Map<String, dynamic> vars) {
         }
       }
     } else {
+      if ((v is String) &&
+          ((v[0] == 'ℛ') || (v[0] == '[')) &&
+          (configAgent != null)) {
+        v = (v[0] == 'ℛ') ? configAgent.getElement(v, vars) : v;
+        if (v is String) {
+          v = v.trim();
+          if (v[0] == '[') {
+            String s = v.substring(1, v.length - 1);
+            v = getListData(s);
+          }
+        }
+        if (v is List<dynamic>) {
+          v = resolveList(v, vars, configAgent: configAgent);
+        }
+      }
       rList.add(v);
     }
   }
@@ -783,4 +832,189 @@ String checkModelText(String text) {
     }
   }
   return text;
+}
+
+getStyleCls(String css, Map<String, dynamic> scls, {bool overwrite = true}) {
+  List<String> sText = css.trim().split('}');
+  for (String st in sText) {
+    String s = st.trim();
+    if (s.isNotEmpty) {
+      List<String> sl = s.split('{');
+      String s0 = sl[0].trim();
+      if ((overwrite) || (scls[s0] == null)) {
+        scls[s0] = getStyle(sl[1].trim());
+      }
+    }
+  }
+}
+
+Map<String, dynamic> getStyle(String s) {
+  Map<String, dynamic> style = {};
+  Color? fillColor;
+  double fillOpacity = 1.0;
+  Color? strokeColor;
+  double strokeOpacity = 1.0;
+  double strokeWith = 1.0;
+  StrokeCap? strokeCap;
+  StrokeJoin? strokeJoin;
+  double? strokeMiterLimit;
+
+  List<String> stl = s.split(';');
+  for (String st in stl) {
+    List<String> cs = st.split(':');
+    switch (cs[0].trim().toLowerCase()) {
+      case 'fill':
+        fillColor = colorConvert(cs[1].trim());
+        break;
+      case "fill-opacity":
+      case "opacity":
+        fillOpacity = double.parse(cs[1].trim());
+        break;
+      case "stroke":
+        strokeColor = colorConvert(cs[1].trim());
+        break;
+      case "stroke-opacity":
+        strokeOpacity = double.parse(cs[1].trim());
+        break;
+      case "stroke-width":
+        String cs1 = cs[1].trim();
+        if (cs1.toLowerCase().contains("px")) {
+          cs1 = cs1.substring(0, cs1.length - 2);
+        }
+        strokeWith = double.parse(cs1);
+        break;
+      case "stroke-miterlimit":
+        strokeMiterLimit = double.parse(cs[1].trim());
+        break;
+      case "stroke-linecap":
+        switch (cs[1].trim()) {
+          case "round":
+            strokeCap = StrokeCap.round;
+            break;
+          case "square":
+            strokeCap = StrokeCap.square;
+            break;
+          case "butt":
+            strokeCap = StrokeCap.butt;
+            break;
+          default:
+            break;
+        }
+        break;
+      case "stroke-linejoin":
+        switch (cs[1].trim()) {
+          case "round":
+            strokeJoin = StrokeJoin.round;
+            break;
+          case "bevel":
+            strokeJoin = StrokeJoin.bevel;
+            break;
+          case "miter":
+            strokeJoin = StrokeJoin.miter;
+            break;
+          default:
+            break;
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  if (fillColor != null) {
+    fillColor = fillColor.withOpacity(fillOpacity);
+    style["fill"] = Paint()
+      ..color = fillColor
+      ..style = PaintingStyle.fill;
+  }
+  if (strokeColor != null) {
+    strokeColor = strokeColor.withOpacity(strokeOpacity);
+    Paint p = Paint()
+      ..color = strokeColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWith;
+    if (strokeMiterLimit != null) {
+      p.strokeMiterLimit = strokeMiterLimit;
+    }
+    if (strokeJoin != null) {
+      p.strokeJoin = strokeJoin;
+    }
+    if (strokeCap != null) {
+      p.strokeCap = strokeCap;
+    }
+    style["stroke"] = p;
+  }
+  return style;
+}
+
+Color? colorConvert(String color) {
+  if (color[0] == '#') {
+    color = color.replaceAll("#", "");
+    dynamic converted;
+    if (color.length < 6) {
+      for (int i = color.length; i < 6; i++) {
+        color += "F";
+      }
+    }
+    if (color.length == 6) {
+      converted = Color(int.parse("0xFF" + color));
+    } else if (color.length == 8) {
+      converted = Color(int.parse("0x" + color));
+    }
+    return converted;
+  }
+  return colorMap[color];
+}
+
+Map<String, dynamic> getMapContent(String s) {
+  Map<String, dynamic> m = {};
+  String str = checkModelText(s);
+  int ninx = 0;
+  while (ninx < str.length) {
+    int inx = str.indexOf(':');
+    String key = str.substring(0, inx).trim();
+    str = str.substring(++inx).trim();
+    late String value;
+    if (str[0] == 'ℛ') {
+      ninx = str.indexOf(')');
+    } else if (str[0] == '[') {
+      ninx = str.indexOf(']');
+    }
+    ninx = str.indexOf(',', ninx);
+    if (ninx < 0) {
+      ninx = str.length;
+    }
+    value = str.substring(0, ninx++);
+    if (ninx < str.length) {
+      str = str.substring(ninx).trim();
+      ninx = 0;
+    }
+    m[key] = resolveStr(value);
+  }
+  return m;
+}
+
+List<dynamic> getListData(String s) {
+  List<dynamic> l = [];
+  String str = s;
+  int ninx = 0;
+  while (ninx < str.length) {
+    late String value;
+    if (str[0] == 'ℛ') {
+      ninx = str.indexOf(')');
+    } else if (str[0] == '[') {
+      ninx = str.indexOf(']');
+    }
+    ninx = str.indexOf(',', ninx);
+    if (ninx < 0) {
+      ninx = str.length;
+    }
+    value = str.substring(0, ninx++);
+    if (ninx < str.length) {
+      str = str.substring(ninx).trim();
+      ninx = 0;
+    }
+    var v = resolveStr(value);
+    l.add(v);
+  }
+  return l;
 }

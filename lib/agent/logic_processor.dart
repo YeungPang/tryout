@@ -85,7 +85,6 @@ class LogicProcessor {
     }
     List<dynamic> expr = [spec];
     return resolveDynList(expr);
-    ;
   }
 
   dynamic resolveDynList(List<dynamic> expr, {bool ret = true}) {
@@ -707,13 +706,6 @@ class LogicProcessor {
       case '↲':
         pr!.returnObj = r;
         return r;
-/*       case '∀':
-        if (varList.isEmpty) {
-          varList.add(vars);
-        }
-        pr!.retain = true;
-        return true;
- */
       case '㏑':
       case '㏒':
       case '𝓮':
