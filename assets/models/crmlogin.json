@@ -305,18 +305,6 @@
                 "⋓({_data: _value[1], _pat: 'noticeRow'}) ⋀ ((∄(_value[1]) ⋀ (_n ≔ Φ(Container))) ⋁ ((_children ≔ itItems) ⋀ ",
                 "(_n ≔ Φ(ListView)))) ⋀ (_children ≔ [_c, _n]) ⋀ (_tabs ≔ [⊤('contact'), ⊤('notice')]) ⋀ ↲(Φ(TabColumn))"
             ],
-            "topCard": [
-                "_item | cardConst ⋀ ⋓({_ed: Φ(Text, {_text: _item['entryDate'], _textStyle: _dec}), _tel: _item[cf_telefon]}) ⋀ ",
-                "((∄(_item[cf_zusatz]) ⋀ (_chi ≔ [])) ⋁ ((_chi ≔ [Φ(Text, {_text: _item[cf_zusatz], _textStyle: ℛ(textStyle, 'Bold20')})]))) ⋀ ",
-                "(_tName ≔ 'cf_adresse') ⋀ (_pat ≔ 'addAddr') ⋀ addPat ⋀ (∄(_chi) ⋁ (_chi ≪ _div)) ⋀ ",
-                "(∄(_tel) ⋁ ((_pref ≔ 'Tel') ⋀ (_chi ⊌ [telRow, _div]))) ⋀ (∄(_item['cf_homepage']) ⋁ ",
-                "(mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀  ⋀ (_h ≔ Φ(Text, {_text: _item['cf_homepage'], _textStyle: _dec})) ⋀ ",
-                "(_ih ≔ Φ(IconButton, {_onTap: {_func: toUrl, _tapAction: _item[cf_homepage]}, _iconColor: 'btnBlue', _icon: 'website'})) ⋀ ",
-                "(_children ≔ [_h, _ih]) ⋀ (_child ≔ Φ(Row)) ⋀ (_chi ≪ (Φ(SizedBox))))) ⋀ ",
-                "(_tName ≔ 'cf_email') ⋀ addItem ⋀ (_chi ⊌ [_div, _ed]) ⋀ mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ",
-                "(_children ≔ _chi) ⋀ ⋓({_child: Φ(Padding, {_child: Φ(Column), _padding: ℛ(appRes, boxPadding)}), ",
-                "_elevation: ℛ(hratio, Ø, 0.01), _cardRadius: ℛ(hratio, Ø, 0.015)}) ⋀ ↲(Φ(SizedBox, {_child: Φ(Card), _width: ℛ(swratio, Ø, 0.995)}))"
-            ],
             "customerData": [
                 "_item | cardConst ⋀ (_ia ≔ _item['cf_adresse']) ⋀ (_adr ≔ (_item['cf_plz'] + ' ' + _item['cf_ort'])) ⋀ ⋓({_entity: 'customer', _textStyle: _dec, ",
                 "_rinfo: {}, _split: true, _attrList: [{_attr: 'cf_zusatz', _textStyle: ℛ(textStyle, 'Bold20')}, 'div', {_attr: 'cf_adresse', ",

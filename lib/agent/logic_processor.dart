@@ -27,7 +27,7 @@ const symbol = "∀∃∄Ø|⦃⦄";
 
 const unaryOp = "'τ#ƒℓℛℒℳ𝘚Φ𝓅⋓↲ç∄∃σ¬∑∆∏⋓⊤㏑㏒𝓮";
 
-const sufOp = "☒!☑☐▶✂";
+const sufOp = "☒!☑☐▶✂⇽";
 
 const statSymbol = "ȳρσĀμχŷỹȲỸŶ𝘗𝘊ℙ";
 
@@ -363,10 +363,25 @@ class LogicProcessor {
     }
     List<dynamic>? r2 = (l != null) ? handleList(l) : null;
     dynamic fact;
-    Map<String, dynamic>? facts = myProcess["facts"];
-    if (facts != null) {
-      fact = facts[e];
+    Map<String, dynamic> facts = myProcess["facts"];
+    List<dynamic> objStack = facts['objStack'];
+    if (objStack.isNotEmpty) {
+      int i = objStack.length - 1;
+      while ((i >= 0) && (fact == null)) {
+        fact = facts[objStack[i]];
+        fact = fact[e];
+        if ((fact is String) && fact.contains('.')) {
+          List<String> ls = fact.split('.');
+          if (objStack.contains(ls[0])) {
+            e = fact;
+            fact = null;
+            break;
+          }
+        }
+        i--;
+      }
     }
+    fact ??= facts[e];
     dynamic r;
     if (fact != null) {
       r = fact;
@@ -387,7 +402,16 @@ class LogicProcessor {
     //setc = true;
     Map<String, dynamic>? myClauses = myProcess["clauses"];
     if (myClauses != null) {
-      var mycls = myClauses[e];
+      dynamic mycls;
+      if (objStack.isNotEmpty) {
+        int i = objStack.length - 1;
+        while ((i >= 0) && (mycls == null)) {
+          fact = facts[objStack[i]];
+          mycls = fact[e];
+          i--;
+        }
+      }
+      mycls = (mycls != null) ? myClauses[mycls] : myClauses[e];
       if (mycls != null) {
         List<dynamic> cList = [];
         if (mycls is List<dynamic>) {
@@ -482,7 +506,13 @@ class LogicProcessor {
       varList = [];
       pr = null;
       gr = null;
+      if (c.object != null) {
+        objStack.add(c.object!);
+      }
       r = resolveDynList(c.preds);
+      if (c.object != null) {
+        objStack.removeAt(0);
+      }
       success = (r is bool) ? r : r != null;
       if (success) {
 /*           if (c.clientVars != null) {
@@ -1380,10 +1410,15 @@ class Clause {
   String? type;
   String? argStr;
   List<dynamic>? inargs;
+  String? object;
 
   Clause(this.name, this.spec, this.process);
 
   init() {
+    int inx = name.indexOf('.');
+    if (inx > 0) {
+      object = name.substring(0, inx);
+    }
     vars = {};
     if (preds.isEmpty) {
       List<String> sl = spec.split('|');

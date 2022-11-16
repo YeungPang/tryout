@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/sample", page: () => HomePage()),
         //GetPage(name: "/sample", page: () => const SampleGroup()),
       ],
-      initialRoute: (mainApp == "crmlogin") ? "/login" : "/home",
+      initialRoute: (mainApp.contains("crm")) ? "/login" : "/home",
       //initialRoute: "/login",
     );
   }

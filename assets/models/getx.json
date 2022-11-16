@@ -1,7 +1,49 @@
 {
     "title": "GetX Test",
+    "blueprint": {
+        "objects": {
+            "obj1": {
+                "a": "a1",
+                "b": 2,
+                "action1": "_b2 | (_a1 ≔ a) ⋀ τ(_a1) ⋀ ↲(_b2 + b)",
+                "action2": "↲(action1(3))"
+            },
+            "obj3": {
+                "b": 4
+            },
+            "obj2": {
+                "extending": [
+                    "obj3",
+                    "obj1"
+                ],
+                "a": "a2",
+                "action1": "_b2 | (_a1 ≔ a) ⋀ τ(_a1) ⋀ ↲(_b2 + b * 2)"
+            }
+        }
+    },
     "patterns": {
         "facts": {
+            "objStack": [],
+            "a": "a3",
+            "b": 12,
+            "title": "Sirius Geography",
+            "dashBoard": {
+                "title": "World Statistic Data",
+                "items": {
+                    "population": {
+                        "icon": "population",
+                        "label": "Population"
+                    },
+                    "pollution": {
+                        "icon": "pollution",
+                        "label": "Pollution"
+                    },
+                    "viruses": {
+                        "icon": "viruses",
+                        "label": "Covid 19"
+                    }
+                }
+            },
             "patHeader": [
                 "hratio",
                 "wratio",
@@ -49,7 +91,13 @@
             }
         },
         "clauses": {
-            "mainView": "((∀(_re) ∈ [3‥1]) ⋀ τ('_re')) ⋀ ↲(Φ(getxHome))",
+            "startMain": "(_title ≔ title) ⋀ ↲(Φ(Scaffold, {_appBar: Φ(AppBar), _body: dashBoard(dashBoard['title'], dashBoard['items'])}))",
+            "dashBoard": "_title, _items | (∃(_item) ∈ _items) ⋀ (∄(_item['description']) ⋀ ↲(iconRowPanel)) ⋁ ↲(columnPanel)",
+            "multi": "_map | ((∃(_clause) ∈ {clause1, clause2, clause3, clause4}) ⋀ (_result ≔ _clause) ⋀ ↲(_result))",
+            "action1": "_b1 | (_a1 ≔ a) ⋀ τ(_a1) ⋀ ↲(_b1 + b + b)",
+            "action2": "↲(action1(5))",
+            "mainView": "setBlueprint() ⋀ (_obj ≔ obj2) ⋀ (_a2 ≔ _obj['action2']) ⋀ (_b1 ≔ _a2) ⋀ τ(_b1) ⋀ (_b1 ≔ action2) ⋀ τ(_b1)  ⋀ ↲(Φ(getxHome))",
+            "mainView1": "((∀(_re) ∈ [3‥1]) ⋀ τ('_re')) ⋀ ↲(Φ(getxHome))",
             "mainAppend1": "append1([1,2], [3,4,5], _re) ⋀ τ('_re') ⋀ ↲(Φ(getxHome))",
             "mainPassBack": "(_re ≔ 'a') ⋀ passBack ⋀ τ('_re') ⋀ τ('_y') ⋀ ↲(Φ(getxHome))",
             "passBack": "_re, _y | (_re ≔ 'b') ⋀ (_y ≔ 'c')",

@@ -1065,6 +1065,9 @@ ProcessPattern getPagingPattern(Map<String, dynamic> pmap) {
     "_childMap",
     "_refreshController",
     "_dataCache",
+    "_expandable",
+    "_expandPattern",
+    "_expandMap",
   ];
   for (String s in nl) {
     dynamic d = pmap[s];

@@ -843,6 +843,12 @@ class _PagingWidgetState extends State<PagingWidget> {
         child: CircularProgressIndicator(),
       );
     }
+    bool expandable = map["_expandable"] ?? false;
+    if (expandable) {
+      return ExpansionPanelList.radio(
+        children: _getExpandableChildren(itemRef),
+      );
+    }
     return ListView.builder(
       controller: sc,
       scrollDirection: map["_direction"] ?? Axis.vertical,
@@ -852,6 +858,17 @@ class _PagingWidgetState extends State<PagingWidget> {
       itemCount: itemRef.length,
       itemBuilder: (context, index) => _itemBuilder(itemRef[index], index),
     );
+  }
+
+  List<ExpansionPanelRadio> _getExpandableChildren(List<dynamic> itemRef) {
+    return List<ExpansionPanelRadio>.generate(itemRef.length, (index) {
+      return ExpansionPanelRadio(
+        value: index,
+        headerBuilder: (BuildContext context, bool isExpanded) =>
+            _itemBuilder(itemRef[index], index),
+        body: _expandedItemBuilder(itemRef[index], index),
+      );
+    });
   }
 
   Widget _itemBuilder(dynamic item, int index) {
@@ -876,6 +893,20 @@ class _PagingWidgetState extends State<PagingWidget> {
     lmap["_child"] = p;
 
     return TapItemPattern(lmap).getWidget();
+  }
+
+  Widget _expandedItemBuilder(dynamic item, int index) {
+    Map<String, dynamic> lmap = {
+      "_item": item,
+      "_index": index,
+    };
+    Function pf = model.appActions.getPattern(map["_expandPattern"])!;
+    Map<String, dynamic>? cmap = map["_expandMap"];
+    if (cmap != null) {
+      lmap.addAll(cmap);
+    }
+    ProcessPattern p = pf(lmap);
+    return p.getWidget();
   }
 
   _nextPage(Map<String, dynamic> m) {

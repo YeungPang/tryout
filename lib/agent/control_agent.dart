@@ -141,10 +141,70 @@ class AgentActions extends AppActions {
           default:
             return true;
         }
+      case "setBlueprint":
+        Map<String, dynamic>? blueprint = model.map['blueprint'];
+        if (blueprint == null) {
+          return false;
+        }
+        Map<String, dynamic>? bmap = blueprint["facts"];
+        if (bmap != null) {
+          facts.addAll(bmap);
+        }
+        bmap = blueprint["clauses"];
+        if (bmap != null) {
+          clauses.addAll(bmap);
+        }
+        bmap = blueprint["objects"];
+        if ((bmap != null) && (bmap.isNotEmpty)) {
+          bmap.forEach((key, value) {
+            Map<String, dynamic> _map = value;
+            dynamic exmap = _map["extending"];
+            if (exmap != null) {
+              if (exmap is String) {
+                Map<String, dynamic>? _m = bmap![exmap];
+                if (_m != null) {
+                  _m.addAll(_map);
+                  _map = _m;
+                }
+              } else if (exmap is List<dynamic>) {
+                for (String s in exmap) {
+                  Map<String, dynamic>? _m = bmap![s];
+                  if (_m != null) {
+                    _m.addAll(_map);
+                    _map = _m;
+                  }
+                }
+              }
+            }
+            Map<String, dynamic> _m = {};
+            _map.forEach((k, v) {
+              if (k != "extending") {
+                String? s = (v is String) ? v : null;
+                if ((s == null) && (v is List<dynamic>) && (v.isNotEmpty)) {
+                  int l = v.length - 1;
+                  s = (v[l] is String) ? v[l] : null;
+                }
+                String _k = key + '.' + k;
+                if ((s != null) &&
+                    (s.contains('↲') ||
+                        s.contains('⋀') ||
+                        s.contains('≔') ||
+                        s.contains('⋁'))) {
+                  clauses[_k] = v;
+                  _m[k] = _k;
+                } else {
+                  _m[k] = v;
+                }
+              }
+            });
+            facts[key] = _m;
+          });
+        }
+        return true;
       case "setConfig":
         if (input is List<dynamic>) {
           String cName = input[0];
-          Map<String, dynamic>? config = model.map[cName];
+          Map<String, dynamic>? config = model.map['cName'];
           if (config == null) {
             return false;
           }
@@ -169,6 +229,15 @@ class AgentActions extends AppActions {
           return input * model.scaleWidth;
         }
         return null;
+      case "getCache":
+        return resxController.getCache(input);
+      case "setCache":
+        if (input is List<dynamic>) {
+          return resxController.setCache(input[0], input[1]);
+        }
+        return null;
+      case "removeCache":
+        return resxController.setCache(input, null);
       case "checkNull":
         String name = input[0];
         var data = vars![name] ?? input[1];
@@ -335,7 +404,17 @@ class AgentActions extends AppActions {
           }
           return true;
         }
-        dynamic c = clauses[name];
+        List<dynamic> objStack = facts['objStack'];
+        dynamic c;
+        if (objStack.isNotEmpty) {
+          int i = objStack.length - 1;
+          while ((i >= 0) && (c == null)) {
+            Map<String, dynamic> fact = facts[objStack[i]];
+            c = fact[name];
+            i--;
+          }
+        }
+        c = (c != null) ? clauses[c] : clauses[name];
         if (c != null) {
           if ((input is! Map<String, dynamic>) && (input != null)) {
             ProcessEvent pe = ProcessEvent(name, map: {});
