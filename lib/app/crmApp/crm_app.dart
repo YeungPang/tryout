@@ -23,6 +23,7 @@ crmAppInit() {
     "login": login,
     "getGroupList": getGroupList,
     "getSubview": getSubview,
+    "getRelation": getRelation,
     "sort": sort,
     "filter": setFilter,
     "refresh": refresh,
@@ -121,41 +122,55 @@ Future<List<List<Mote>>> _getSubview(
 
 getSubview(Map<String, dynamic> m) {
   List<List<dynamic>> pList = [];
-  _getSubview(m["_pageId"], m['_pageSubmote'], m["_cols"]).then((mList) {
-    List<dynamic>? refs = m["_refs"];
-    int i = 0;
-    for (List<Mote> ml in mList) {
-      List<dynamic> pl = [];
-      List<dynamic> rl = (refs != null) ? refs[i] : [];
-      if (ml.isNotEmpty) {
-        for (Mote m in ml) {
-          Map<String, dynamic> mp = {};
-          mp.addAll(m.payload);
-          _addIdTimestamp(m, mp);
-          if (rl.isNotEmpty) {
-            for (String r in rl) {
-              dynamic dr = mp[r];
-              if (dr != null) {
-                dynamic ref = MoteRelation.asMoteList(dr, m.id);
-                mp[r] = ref.map((c) => c.payload['title']).toList();
+  int pageId = m['_pageId'];
+  int id = m["_pageSubmote"];
+  if (pageId >= 0) {
+    _getSubview(pageId, id, m["_cols"]).then((mList) {
+      List<dynamic>? refs = m["_refs"];
+      int i = 0;
+      for (List<Mote> ml in mList) {
+        List<dynamic> pl = [];
+        List<dynamic> rl = (refs != null) ? refs[i] : [];
+        if (ml.isNotEmpty) {
+          for (Mote m in ml) {
+            Map<String, dynamic> mp = {};
+            mp.addAll(m.payload);
+            _addIdTimestamp(m, mp);
+            if (rl.isNotEmpty) {
+              for (String r in rl) {
+                dynamic dr = mp[r];
+                if (dr != null) {
+                  dynamic ref = MoteRelation.asMoteList(dr, m.id);
+                  mp[r] = ref.map((c) => c.payload['title']).toList();
+                }
               }
             }
+            pl.add(mp);
           }
-          pl.add(mp);
         }
+        pList.add(pl);
+        i++;
       }
-      pList.add(pl);
-      i++;
-    }
-    ProcessEvent pe = m["_processEvent"];
-    Agent a = model.appActions.getAgent("pattern");
-    if (pe.map == null) {
-      pe.map = {"_value": pList};
-    } else {
-      pe.map!["_value"] = pList;
-    }
-    a.process(pe);
-  });
+      ProcessEvent pe = m["_processEvent"];
+      Agent a = model.appActions.getAgent("pattern");
+      if (pe.map == null) {
+        pe.map = {"_value": pList};
+      } else {
+        pe.map!["_value"] = pList;
+      }
+      a.process(pe);
+    });
+  } else {}
+}
+
+dynamic getRelation(Map<String, dynamic> m) {
+  int rid = m["relId"];
+  var ref = m["ref"];
+  if (ref != null) {
+    dynamic ret = MoteRelation.asMoteList(ref, rid);
+    return ret.map((c) => c.payload['title']).toList();
+  }
+  return null;
 }
 
 setFilter(Map<String, dynamic> m) {

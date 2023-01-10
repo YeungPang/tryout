@@ -469,6 +469,7 @@ ProcessPattern getInTextFieldPattern(Map<String, dynamic> pmap) {
   List<String> nl = [
     "_autocorrect",
     "_autofocus",
+    "_focusNode",
     "_textController",
     "_enabled",
     "_textStyle",
@@ -493,7 +494,9 @@ ProcessPattern getInTextFieldPattern(Map<String, dynamic> pmap) {
     "_clear",
     "_incomplete",
     "_retainFocus",
-    "_textNoti"
+    "_textNoti",
+    "_isState",
+    "_clear"
   ];
   for (String s in nl) {
     dynamic d = pmap[s];
@@ -1141,6 +1144,8 @@ ProcessPattern getTabColumnPattern(Map<String, dynamic> pmap) {
     "_tabs": pmap["_tabs"],
     "_children": pmap["_children"],
     "_key": pmap["_key"],
+    "_index": pmap["_index"],
+    "_inxName": pmap["_inxName"]
   };
   return TabColumnPattern(map);
 }
@@ -1207,6 +1212,7 @@ ProcessPattern getTextIconList(Map<String, dynamic> pmap) {
     "_iconFirst",
     "_fitted",
     "_entity",
+    "_object",
     "_attrList",
     "_rinfo",
     "_item",
@@ -1261,6 +1267,33 @@ ProcessPattern getSwitchPattern(Map<String, dynamic> pmap) {
   return SwitchPattern(map);
 }
 
+ProcessPattern getCupertinoSwitchPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_switch",
+    "_trackColor",
+    "_activeColor",
+    "_onTap",
+    "_tapAction",
+  ];
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  return CupertinoSwitchPattern(map);
+}
+
+ProcessPattern getCircleAvatarPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {
+    "_child": pmap["_child"],
+    "_radius": pmap["_radius"],
+    "_backgroundColor": pmap["_backgroundColor"]
+  };
+  return CircleAvatarPattern(map);
+}
+
 final Map<String, Function> getPrimePattern = {
   "Align": getAlignPattern,
   "AppBar": getAppBarPattern,
@@ -1270,10 +1303,12 @@ final Map<String, Function> getPrimePattern = {
   "Drawer": getDrawerPattern,
   "Card": getCardPattern,
   "Center": getCenterPattern,
+  "CircleAvatar": getCircleAvatarPattern,
   "ClipRRect": getClipRRectPattern,
   "ColorButton": getColorButtonPattern,
   "Column": getColumnPattern,
   "Container": getContainerPattern,
+  "CupertinoSwitch": getCupertinoSwitchPattern,
   "DottedBorder": getDottedBorderPattern,
   "Draggable": getDraggablePattern,
   "DragTarget": getDragTargetPattern,

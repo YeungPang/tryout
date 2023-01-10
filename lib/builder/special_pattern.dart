@@ -107,71 +107,124 @@ class InTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController tc = map["_textController"];
-    // Map<String, dynamic> pMap;
-    // pMap = map["_parent"];
-    // if (pMap != null) {
-    //   pMap["_textEditingController"] = tc;
+    FocusNode? fn = map["_focusNode"];
+    // if (fn != null) {
+    //   map["_autofocus"] = true;
     // }
-    Widget? p = getPatternWidget(map["_prefixIcon"]);
-    Widget? s = getPatternWidget(map["_suffixIcon"]);
-    Widget? ic = getPatternWidget(map["icon"]);
-    return TextField(
-      autocorrect: map["_autocorrect"] ?? true,
-      autofocus: map["_autofocus"] ?? true,
-      controller: tc,
-      onEditingComplete: () => _completeEdit(tc, context),
-      enabled: map["_enabled"] ?? true,
-      style: map["_textStyle"],
-      showCursor: map["_showCursor"],
-      maxLines: map["_maxLines"] ?? 1,
-      expands: map["_expands"] ?? false,
-      onSubmitted: map["_onSubmitted"],
-      keyboardType: map["_keyboardType"],
-      decoration: InputDecoration(
-        border: map["_inputBorder"] ?? const OutlineInputBorder(),
-        icon: ic,
-        hintText: map["_hintText"],
-        hintStyle: map["_hintStyle"],
-        labelText: map["_labelText"],
-        labelStyle: map["_labelStyle"],
-        prefixIcon: p,
-        suffixIcon: s,
-        filled: map["_filled"],
-        fillColor: map["_fillColor"],
-        contentPadding: map["_padding"],
-      ),
-    );
+    return _buildTextField(context, map, fn);
+  }
+}
+
+Widget _buildTextField(
+    BuildContext context, Map<String, dynamic> map, FocusNode? fn) {
+  TextEditingController tc = map["_textController"];
+  // Map<String, dynamic> pMap;
+  // pMap = map["_parent"];
+  // if (pMap != null) {
+  //   pMap["_textEditingController"] = tc;
+  // }
+  bool clear = map["_clear"] ?? false;
+  if (clear) {
+    tc.text = '';
+  }
+  Widget? p = getPatternWidget(map["_prefixIcon"]);
+  Widget? s = getPatternWidget(map["_suffixIcon"]);
+  Widget? ic = getPatternWidget(map["icon"]);
+  return TextField(
+    key: map["_key"],
+    autocorrect: map["_autocorrect"] ?? true,
+    autofocus: map["_autofocus"] ?? true,
+/*     onTap: () {
+      map["_tapped"] = true;
+    }, */
+    focusNode: fn,
+    controller: tc,
+    onEditingComplete: () => _completeEdit(tc, context, map),
+    enabled: map["_enabled"] ?? true,
+    style: map["_textStyle"],
+    showCursor: map["_showCursor"],
+    maxLines: map["_maxLines"] ?? 1,
+    expands: map["_expands"] ?? false,
+    onSubmitted: map["_onSubmitted"],
+    keyboardType: map["_keyboardType"],
+    decoration: InputDecoration(
+      border: map["_inputBorder"] ?? const OutlineInputBorder(),
+      icon: ic,
+      hintText: map["_hintText"],
+      hintStyle: map["_hintStyle"],
+      labelText: map["_labelText"],
+      labelStyle: map["_labelStyle"],
+      prefixIcon: p,
+      suffixIcon: s,
+      filled: map["_filled"],
+      fillColor: map["_fillColor"],
+      contentPadding: map["_padding"],
+    ),
+  );
+}
+
+_completeEdit(
+    TextEditingController tc, BuildContext context, Map<String, dynamic> map) {
+  String text = tc.text.toString();
+  if (text.isNotEmpty) {
+    dynamic actions = map["_complete"];
+    if (actions != null) {
+      if (actions is ProcessEvent) {
+        model.appActions.doFunction(actions.name, actions.map, actions.map);
+      } else if (actions is Map<String, dynamic>) {
+        model.appActions.doFunction(
+            actions["_func"], actions["_tapAction"], actions["_map"]);
+      }
+    }
+    bool clear = map["_clear"] ?? false;
+    if (clear) {
+      tc.clear();
+    }
+  } else {
+    ProcessEvent? actions = map["_incomplete"];
+    if (actions != null) {
+      model.appActions.doFunction(actions.name, actions.map, actions.map);
+    }
+  }
+  bool retainFocus = map["_retainFocus"] ?? false;
+  if (retainFocus) {
+    FocusScope.of(context).requestFocus();
+  } else {
+    FocusScope.of(context).requestFocus(FocusNode());
+  }
+}
+
+class StateTextField extends StatefulWidget {
+  final Map<String, dynamic> map;
+  const StateTextField(this.map, {Key? key}) : super(key: key);
+
+  @override
+  _StateTextField createState() => _StateTextField();
+}
+
+class _StateTextField extends State<StateTextField> {
+  late Map<String, dynamic> map;
+  FocusNode? fn;
+
+  @override
+  void initState() {
+    map = widget.map;
+    fn = map["_focusNode"];
+    map["_autofocus"] = true;
+    super.initState();
   }
 
-  _completeEdit(TextEditingController tc, BuildContext context) {
-    String text = tc.text.toString();
-    if (text.isNotEmpty) {
-      dynamic actions = map["_complete"];
-      if (actions != null) {
-        if (actions is ProcessEvent) {
-          model.appActions.doFunction(actions.name, actions.map, actions.map);
-        } else if (actions is Map<String, dynamic>) {
-          model.appActions.doFunction(
-              actions["_func"], actions["_tapAction"], actions["_map"]);
-        }
-      }
-      bool clear = map["_clear"] ?? false;
-      if (clear) {
-        tc.clear();
-      }
-    } else {
-      ProcessEvent? actions = map["_incomplete"];
-      if (actions != null) {
-        model.appActions.doFunction(actions.name, actions.map, actions.map);
-      }
-    }
-    bool retainFocus = map["_retainFocus"] ?? false;
-    if (retainFocus) {
-      FocusScope.of(context).requestFocus();
-    } else {
-      FocusScope.of(context).requestFocus(FocusNode());
-    }
+  @override
+  void dispose() {
+/*     if (fn != null) {
+      fn!.dispose();
+    } */
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildTextField(context, map, fn);
   }
 }
 
@@ -179,7 +232,12 @@ class InTextFieldPattern extends ProcessPattern {
   InTextFieldPattern(Map<String, dynamic> map) : super(map);
   @override
   Widget getWidget({String? name}) {
-    return InTextField(map);
+    bool? isState = map["_isState"];
+    if (isState == true) {
+      return StateTextField(map);
+    } else {
+      return InTextField(map);
+    }
   }
 }
 
@@ -292,7 +350,9 @@ _onTap(BuildContext? context, Map<String, dynamic> map) {
         return;
       }
     }
-    model.context = (key == null) ? context : key.currentContext;
+    if ((context != null) || (key != null)) {
+      model.context = (key == null) ? context : key.currentContext;
+    }
     model.appActions.doFunction(func, m, _map);
     //controller.model.context = null;
   }
@@ -1171,6 +1231,8 @@ class _TabColumnWidget extends State<TabColumnWidget>
   late TabController _tc;
   final List<Widget> _tabList = [];
   late List<Widget> _children;
+  int inx = 0;
+  String? inxName;
 
   @override
   void initState() {
@@ -1197,8 +1259,21 @@ class _TabColumnWidget extends State<TabColumnWidget>
       }
       _tabList.add(t);
     }
-    _tc = TabController(length: _tabList.length, vsync: this);
+    inxName = map["_inxName"];
+    inx = (inxName != null)
+        ? resxController.getCache(inxName!)
+        : (map["_index"] ?? 0);
+    _tc =
+        TabController(length: _tabList.length, vsync: this, initialIndex: inx);
     _children = getPatternWidgetList(map["_children"]);
+    if (inxName != null) {
+      _tc.addListener(() {
+        if (!_tc.indexIsChanging) {
+          inx = _tc.index;
+          resxController.setCache(inxName!, inx);
+        }
+      });
+    }
     super.initState();
   }
 
@@ -1442,13 +1517,19 @@ class TextIconRow extends StatelessWidget {
     bool split = map["_split"] ?? false;
     bool iconFirst = map["_iconFirst"] ?? false;
     late Widget g;
-    if (split) {
+    dynamic pat = map["_pat"];
+    if (pat != null) {
+      if (pat is ProcessPattern) {
+        pat = pat.getWidget();
+      }
+    }
+    if (split || (pat != null)) {
       Widget t = Expanded(
           child: (fitted)
               ? FittedBox(
-                  child: Text(map["_text"], style: map["_textStyle"]),
+                  child: pat ?? Text(map["_text"], style: map["_textStyle"]),
                 )
-              : Text(map["_text"], style: map["_textStyle"]));
+              : pat ?? Text(map["_text"], style: map["_textStyle"]));
       Widget? ic = (icon != null)
           ? GestureDetector(
               onTap: () => _onTap(context, map),
@@ -1512,9 +1593,15 @@ class TextIconListPattern extends ProcessPattern {
 
   setChildren() {
     dynamic item = map["_item"];
-    Map<String, dynamic> entity = model.map["entity"];
+    late Map<String, dynamic> entity;
+    dynamic ent = map["_entity"];
+    if (ent == null) {
+      entity = model.map["patterns"]["facts"];
+      ent = map["_object"];
+    } else {
+      entity = model.map["entity"];
+    }
     String header = entity["header"];
-    var ent = map["_entity"];
     Map<String, dynamic> me = {};
     if (ent is List<dynamic>) {
       for (String e in ent) {
@@ -1540,27 +1627,53 @@ class TextIconListPattern extends ProcessPattern {
         String? name = (ma != null) ? ma["_attr"] : a;
         String? attr;
         dynamic data;
+        dynamic pat;
         if (name != null) {
           attr = me[name];
           data = _getItemData(name, item);
+        } else {
+          pat = (ma != null) ? ma["_pat"] : null;
         }
         if (((attr != null) && (data != null)) ||
             ((ma != null) && (attr == null))) {
-          d++;
-          ta++;
           Map<String, dynamic> m = (attr != null)
               ? model.appActions.doFunction("patMap", [header, attr], null)
               : {};
           m.addAll(map);
           if (ma != null) {
             m.addAll(ma);
+            if (pat != null) {
+              pat = model.appActions.doFunction("processNewClause", pat, m);
+              if (pat != 'Ø') {
+                m["_pat"] = pat;
+              }
+            }
           }
           if (data != null) {
             m["_text"] = (m["_prefix"] != null)
                 ? m["_prefix"] + data.toString()
                 : data.toString();
           }
-          children.add(TextIconRow(m));
+          if ((m["_onTap"] == null) && (m["_func"]) != null) {
+            Map<String, dynamic> _onTap = {"_func": m["_func"]};
+            String? tapAction = m["_tap"];
+            if (tapAction != null) {
+              if (tapAction == '_') {
+                _onTap["_tapAction"] = data;
+              } else {
+                String _ta = me[tapAction];
+                Map<String, dynamic> _m =
+                    model.appActions.doFunction("processNewClause", _ta, m);
+                _onTap.addAll(_m);
+              }
+            }
+            m["_onTap"] = _onTap;
+          }
+          if (pat != 'Ø') {
+            children.add(TextIconRow(m));
+            d++;
+            ta++;
+          }
         }
       }
     }
@@ -1593,14 +1706,43 @@ class TextIconListPattern extends ProcessPattern {
   }
 }
 
-getAttrMap(String name, Map<String, dynamic> me, Map<String, dynamic> entity) {
+getAttrMap(String name, Map<String, dynamic> me, Map<String, dynamic> entity,
+    {List<dynamic>? nlist}) {
   Map<String, dynamic> attr = entity[name];
   attr.forEach((key, value) {
     if (key[0] == '_') {
       String k = key.substring(1);
-      getAttrMap(k, me, entity);
+      getAttrMap(k, me, entity, nlist: nlist);
     } else {
-      me[key] = value;
+      if ((nlist == null) || (nlist.contains(key))) {
+        me[key] = value;
+      }
     }
   });
+}
+
+class CupertinoSwitchPattern extends ProcessPattern {
+  CupertinoSwitchPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    bool s = map["_switch"];
+    dynamic tColor = map["_trackColor"];
+    if (tColor is String) {
+      tColor = colorMap[tColor];
+    }
+    tColor ??= Colors.grey;
+    dynamic aColor = map["_activeColor"];
+    if (aColor is String) {
+      aColor = colorMap[aColor];
+    }
+    aColor ??= Colors.blue;
+    return CupertinoSwitch(
+        trackColor: tColor,
+        activeColor: aColor,
+        value: s,
+        onChanged: (newValue) {
+          map["_switch"] = newValue;
+          _onTap(null, map);
+        });
+  }
 }

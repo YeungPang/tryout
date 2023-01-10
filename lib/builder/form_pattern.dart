@@ -251,13 +251,30 @@ Widget _getSubmitButton(Map<String, dynamic> map) {
 }
 
 ProcessPattern getEntityFormPattern(Map<String, dynamic> map) {
-  Map<String, dynamic> entity = model.map["entity"];
+  Map<String, dynamic> entity =
+      model.map["entity"] ?? model.map["patterns"]["facts"];
+  dynamic ent = map["_entity"] ?? map["_object"];
+/*   if (ent == null) {
+    entity = model.map["patterns"]["facts"];
+    ent = map["_object"];
+  } else {
+    entity = model.map["entity"];
+  } */
   String header = entity["header"];
-  var ent = map["_entity"];
   //String? title = model.map["text"][ent];
   Map<String, dynamic> me = {};
+  if (ent is List<dynamic>) {
+    for (String e in ent) {
+      dynamic obj = entity[e]['fields'];
+      getAttrMap(e, me, entity, nlist: obj);
+    }
+  } else if (ent is String) {
+    dynamic obj = entity[ent]['fields'];
+    getAttrMap(ent, me, entity, nlist: obj);
+  } else {
+    me = ent;
+  }
   List<dynamic> flds = [];
-  getAttrMap(ent, me, entity);
   me.forEach(
     (key, value) {
       Map<String, dynamic> m =

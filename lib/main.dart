@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tryout/app/xeminoApp/login_screen.dart';
-import 'package:tryout/app/xeminoApp/test/sample_group.dart';
+//import 'package:tryout/app/xeminoApp/test/sample_group.dart';
 import './agent/resx_controller.dart';
 import './builder/pattern.dart';
 import './model/main_model.dart';

@@ -105,7 +105,7 @@ class IconPattern extends ProcessPattern {
   Widget getWidget({String? name}) {
     String iname = map["_icon"]!;
     IconData? id = myIcons[iname];
-    double size = map["_iconSize"] ?? 24.0;
+    double size = map["_iconSize"] ?? 24.0 * model.sizeScale;
     size *= model.sizeScale;
     var c = map["_iconColor"] ?? const Color(0xFF00344F);
     if (c is String) {

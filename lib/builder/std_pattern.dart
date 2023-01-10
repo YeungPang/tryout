@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_networkimage_2/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:tryout/model/locator.dart';
 import '../resources/fonts.dart';
 import './pattern.dart';
 
@@ -743,6 +744,19 @@ class FlexiblePattern extends ProcessPattern {
     return Flexible(
       fit: map["_fit"] ?? FlexFit.loose,
       flex: map["_flex"] ?? 1,
+      child: w!,
+    );
+  }
+}
+
+class CircleAvatarPattern extends ProcessPattern {
+  CircleAvatarPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    Widget? w = getPatternWidget(map["_child"]);
+    return CircleAvatar(
+      radius: map["_radius"] ?? 40.0 * model.sizeScale,
+      backgroundColor: map["_backgroundColor"] ?? Colors.white,
       child: w!,
     );
   }

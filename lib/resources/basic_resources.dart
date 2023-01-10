@@ -48,6 +48,7 @@ Map<String, dynamic> resources = {
   "boxPadding": boxPadding,
   "catBoxPadding": catBoxPadding,
   "catIconPadding": catIconPadding,
+  "h20Padding": h20Padding,
   "clampingScrollPhysics": clampingScrollPhysics,
   "blueGradBD": blueGradBD,
   "diaDecoration": diaDecoration,
@@ -170,6 +171,7 @@ final BoxDecoration btnDecoration = elemDecoration;
 
 final catBoxPadding = EdgeInsets.symmetric(vertical: model.size10);
 final catIconPadding = EdgeInsets.symmetric(horizontal: model.size10);
+final h20Padding = EdgeInsets.symmetric(horizontal: model.size20);
 final boxPadding = EdgeInsets.all(model.size20);
 final aboxPadding =
     EdgeInsets.symmetric(vertical: model.size10, horizontal: model.size20);

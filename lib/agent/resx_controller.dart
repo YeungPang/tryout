@@ -57,8 +57,11 @@ class ResxController extends GetxController {
   }
 
   dynamic getRxValue(String name) {
-    Rx rx = resxMap[name];
-    return rx.value;
+    Rx? rx = resxMap[name];
+    if (rx != null) {
+      return rx.value;
+    }
+    return null;
   }
 
   setCache(String name, dynamic value) {

@@ -41,7 +41,11 @@ class AgentActions extends AppActions {
       case "mapPat":
         return controlAgent.mapPat(input, vars!);
       case "fsmEvent":
-        ProcessEvent pe = ProcessEvent(input, map: vars);
+        ProcessEvent pe = (input is List<dynamic>)
+            ? ((input.length == 2)
+                ? ProcessEvent(input[0], map: input[1])
+                : ProcessEvent(input[0]))
+            : ProcessEvent(input, map: vars);
         Agent a = getAgent("pattern");
         return a.process(pe);
       case "decode":
@@ -66,6 +70,14 @@ class AgentActions extends AppActions {
           Get.back();
         }
         return true;
+      case "setResxValue":
+        if (input is List<dynamic>) {
+          resxController.setRxValue(input[0], input[1]);
+          return true;
+        }
+        return null;
+      case "getResxValue":
+        return resxController.getRxValue(input);
       case "home":
         Get.offAllNamed("/home");
         return true;
@@ -233,11 +245,19 @@ class AgentActions extends AppActions {
         return resxController.getCache(input);
       case "setCache":
         if (input is List<dynamic>) {
-          return resxController.setCache(input[0], input[1]);
+          resxController.setCache(input[0], input[1]);
+          return true;
         }
         return null;
       case "removeCache":
         return resxController.setCache(input, null);
+      case "setFact":
+        if (input is List<dynamic>) {
+          facts[input[0]] = input[1];
+          return true;
+        }
+        return null;
+
       case "checkNull":
         String name = input[0];
         var data = vars![name] ?? input[1];
@@ -380,8 +400,16 @@ class AgentActions extends AppActions {
           return true;
         }
       case "processNewClause":
-        clauses[input[0]] = input[1];
-        ProcessEvent pe = ProcessEvent(input[0], map: vars);
+        late String cname;
+        if (input is List<dynamic>) {
+          cname = input[0];
+          if (input.length > 1) {
+            clauses[input[0]] = input[1];
+          }
+        } else {
+          cname = input;
+        }
+        ProcessEvent pe = ProcessEvent(cname, map: vars);
         Agent a = getAgent("pattern");
         return a.process(pe);
       default:
@@ -605,6 +633,8 @@ class AgentActions extends AppActions {
         return RefreshController();
       case "textController":
         return TextEditingController();
+      case "focusNode":
+        return FocusNode();
       case "function":
         return appFunc[spec];
       case "text":

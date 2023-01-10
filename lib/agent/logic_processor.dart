@@ -6,7 +6,7 @@ import '../model/locator.dart';
 import 'package:string_validator/string_validator.dart';
 
 final re = RegExp(
-    r"[⋀⋁⊻∈⋓⋂∉⋃∃∄↲⊆⊂⊄≠=≈~⇒&∣|\*\-+－＋⁺⁻\/≁≪≫←→≥≤<>≔⊌⥹⥻⟷@,Φσℒℛℝℳ𝘚𝕄𝄁ƒ𝓅⋓ℓ#τ𝕥‥⊖:]");
+    r"[⋀⋁⊻∈⋓⋂∉⋃∃∄↲⊆⊂⊄≠=≈~⇒&∣|\*\-+－＋⁺⁻\/≁≪≫←→≥≤<>≔⊌⥹⥻⟷@,Φσℒℛℝℳ𝘚𝕄𝄁ƒ𝓅⋓ℓ#τ𝕥‥⊖:ç]");
 
 const binOp = "∈|@∉⊆⊂⊄≠=≈~⇒&∣⊻≪≫≥≤<>－＋⥹⥻‥";
 const matrixSymbol = "𝔸𝔹ℂ𝔻𝔼𝔽𝕄ℝ𝕥𝄁";
@@ -25,7 +25,7 @@ const andOr = "⋀⋁";
 
 const symbol = "∀∃∄Ø|⦃⦄";
 
-const unaryOp = "'τ#ƒℓℛℒℳ𝘚Φ𝓅⋓↲ç∄∃σ¬∑∆∏⋓⊤㏑㏒𝓮";
+const unaryOp = "'τ#ƒℓℛℒℳ𝘚Φ𝓅⋓↲ç∄∃σ¬∑∆∏⊤㏑㏒𝓮";
 
 const sufOp = "☒!☑☐▶✂⇽";
 
@@ -581,7 +581,17 @@ class LogicProcessor {
       return null;
     }
     if ((e == 'ƒ') || (e == '𝓅')) {
-      String name = l[0];
+      var name = l[0];
+      if (name is List<dynamic>) {
+        name = resolveDynList(name);
+        if (name == null) {
+          List<dynamic> lf = l[0];
+          var lf0 = lf[0];
+          if ((lf0 is String) && (lf0[0] == '_')) {
+            lf[0] = vars[lf0];
+          }
+        }
+      }
       if (name[0] == '_') {
         name = vars[name];
       }
@@ -1584,17 +1594,38 @@ List<dynamic> splitPred(String predSpec) {
         }
       }
       if (predSpec[i] == '{') {
-        if (s.contains(':')) {
+        if (s.contains(':') || s[0] == '}') {
           acp.add('ℳ');
         } else {
           acp.add('𝘚');
+          if (s[0] == nil) {
+            s.replaceFirst(nil, ' ');
+          }
         }
       }
       if ((predSpec[i] == '(') &&
-          (acp.isNotEmpty &&
-              (acp.last is String) &&
-              ((acp.last[0] == '_') || isAlphanumeric(acp.last)))) {
-        cp.add(acp.last);
+          (acp.isNotEmpty) &&
+          ((acp.last is String) &&
+              ((acp.last[0] == '_') ||
+                  isAlphanumeric(acp.last) ||
+                  acp.last.contains('.')))) {
+        String lstr = acp.last;
+        List<String> ldot = lstr.split('.');
+        if (ldot.length > 1) {
+          List<dynamic> ld = [];
+          if (ldot[0].isEmpty) {
+            int inx = acp.length - 2;
+            ld.add(acp[inx]);
+            acp.removeAt(inx);
+          } else {
+            ld.add(ldot[0]);
+          }
+          ld.add('@');
+          ld.add(ldot[1]);
+          cp.add(ld);
+        } else {
+          cp.add(acp.last);
+        }
         acp.removeLast();
         acp.add('ƒ');
         cp.add(',');
