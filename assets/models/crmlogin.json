@@ -86,18 +86,15 @@
                 "subviewId": 7,
                 "subviewCols": [
                     1,
-                    2,
-                    -1
+                    2
                 ],
                 "subviewObj": [
                     "contact",
-                    "notice",
-                    "timer"
+                    "notice"
                 ],
                 "subviewTabs": [
                     "Kontakte",
-                    "Notizen",
-                    "Zeitmessung"
+                    "Notizen"
                 ],
                 "fields": [
                     "title",
@@ -112,7 +109,7 @@
                 "valueName": "contactPage",
                 "formAction": "_item | ↲({_tapAction: 'formScaffold', _map: {_object: 'customer', _formData: _item, _fsm: 'saveObjfsm'}})",
                 "map": "↲(objMap({_obj: customer}))",
-                "subviews": "↲(['contact.row', 'notice.row', 'timer.row'])",
+                "subviews": "↲(['contact.row', 'notice.row'])",
                 "detail": "_item, _barTitle | (_barTitle ≔ _item['title']) ⋀ (_obj  ≔ customer) ⋀ ↲(tabSubView)",
                 "topCard": [
                     "_item | cardConst ⋀ ⋓({_object: 'customer', _textStyle: _dec, _rinfo: {}, _split: true, ",

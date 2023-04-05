@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tryout/builder/check_list.dart';
+import './calendar.dart';
 import './pattern.dart';
 import './std_pattern.dart';
 import './special_pattern.dart';
@@ -9,6 +11,9 @@ import '../resources/icons.dart';
 import './item_search.dart';
 import 'package:json_theme/json_theme.dart';
 import './form_pattern.dart';
+
+final List<String> processEvent = ["_processEvent", "_inMap", "_value"];
+final List<String> tap = ["_onTap", "_processEvent", "_inMap", "_value"];
 
 BoxDecoration? getDecoration(String image) {
   return ThemeDecoder.decodeBoxDecoration({
@@ -185,7 +190,8 @@ ProcessPattern getImageAssetPattern(Map<String, dynamic> pmap) {
     "_repeat",
     "_centerSlice",
     "_matchTextDirection",
-    "_filterQuality"
+    "_filterQuality",
+    "_image"
   ];
   for (String s in nl) {
     dynamic d = pmap[s];
@@ -508,66 +514,18 @@ ProcessPattern getInTextFieldPattern(Map<String, dynamic> pmap) {
   return InTextFieldPattern(map);
 }
 
-ProcessPattern? getValueTextPattern(Map<String, dynamic> pmap) {
-  Map<String, dynamic> map = {
-    "_notifier": pmap["_notifier"],
-    "_converter": pmap["_converter"]
-  };
-  ValueNotifier? notifier = map["_notifier"];
-  if (notifier == null) {
-    return null;
-  }
-  var value = notifier.value;
-  if (value is String) {
-    return ValueTextPattern<String>(map);
-  } else if (value is Map<String, dynamic>) {
-    return ValueTextPattern<Map<String, dynamic>>(map);
-  } else if (value is int) {
-    return ValueTextPattern<int>(map);
-  } else if (value is Pattern) {
-    return ValueTextPattern<Pattern>(map);
-  } else if (value is List<Pattern>) {
-    return ValueTextPattern<List<Pattern>>(map);
-  } else if (value is double) {
-    return ValueTextPattern<double>(map);
-  } else if (value is bool) {
-    return ValueTextPattern<bool>(map);
-  } else if (value is List<int>) {
-    return ValueTextPattern<List<int>>(map);
-  }
-  return null;
-}
-
-ProcessPattern getValueChildContainerPattern(Map<String, dynamic> pmap) {
+ProcessPattern getTapItemPattern(Map<String, dynamic> pmap) {
   Map<String, dynamic> map = {};
   List<String> nl = [
-    "_childNoti",
-    "_color",
-    "_alignment",
-    "_clipBehavior",
-    "_boxConstraints",
-    "_decoration",
-    "_margin",
-    "_padding",
-    "_transform",
-    "_width",
-    "_height"
+    "_child",
   ];
+  nl.addAll(tap);
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
       map[s] = d;
     }
   }
-  return ValueChildContainerPattern(map);
-}
-
-ProcessPattern getTapItemPattern(Map<String, dynamic> pmap) {
-  Map<String, dynamic> map = {
-    "_child": pmap["_child"],
-    "_onTap": pmap["_onTap"],
-    "_tapAction": pmap["_tapAction"]
-  };
   return TapItemPattern(map);
 }
 
@@ -655,14 +613,6 @@ ProcessPattern getSizedBoxExpandPattern(Map<String, dynamic> pmap) {
   return SizedBoxExpandPattern(map);
 }
 
-ProcessPattern getValueOpacityPattern(Map<String, dynamic> pmap) {
-  Map<String, dynamic> map = {
-    "_child": pmap["_child"],
-    "_notifier": pmap["_notifier"]
-  };
-  return ValueOpacityPattern(map);
-}
-
 ProcessPattern getScrollLayoutPattern(Map<String, dynamic> pmap) {
   Map<String, dynamic> map = {"_child": pmap["_child"]};
   return ScrollLayoutPattern(map);
@@ -746,41 +696,6 @@ ProcessPattern getColorButtonPattern(Map<String, dynamic> pmap) {
   return ColorButtonPattern(map);
 }
 
-ProcessPattern? getValueTypeListenerPattern(Map<String, dynamic> pmap) {
-  Map<String, dynamic> map = {
-    "_notifier": pmap["_notifier"],
-    "_notifierKey": pmap["_notifierKey"],
-    "_child": pmap["_child"]
-  };
-  ValueNotifier? notifier = map["_notifier"];
-  if (notifier == null) {
-    return null;
-  }
-  var value = notifier.value;
-  if (value is String) {
-    return ValueTypeListenerPattern<String>(map);
-  } else if (value is Map<String, dynamic>) {
-    return ValueTypeListenerPattern<Map<String, dynamic>>(map);
-  } else if (value is int) {
-    return ValueTypeListenerPattern<int>(map);
-  } else if (value is ProcessPattern) {
-    return ValueTypeListenerPattern<ProcessPattern>(map);
-  } else if (value is List<dynamic>) {
-    return ValueTypeListenerPattern<List<dynamic>>(map);
-  } else if (value is Widget) {
-    return ValueTypeListenerPattern<Widget>(map);
-  } else if (value is List<Widget>) {
-    return ValueTypeListenerPattern<List<Widget>>(map);
-  } else if (value is double) {
-    return ValueTypeListenerPattern<double>(map);
-  } else if (value is bool) {
-    return ValueTypeListenerPattern<bool>(map);
-  } else if (value is List<int>) {
-    return ValueTypeListenerPattern<List<int>>(map);
-  }
-  return null;
-}
-
 /* ProcessPattern getSvgPaintPattern(Map<String, dynamic> pmap) {
   Map<String, dynamic> map = {};
   List<String> nl = [
@@ -824,11 +739,11 @@ ProcessPattern getIconButtonPattern(Map<String, dynamic> pmap) {
     "_icon",
     "_iconSize",
     "_iconColor",
-    "_onTap",
     "_tapAction",
     "_key",
     "_padding",
   ];
+  nl.addAll(tap);
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
@@ -876,10 +791,10 @@ ProcessPattern getIconTextPattern(Map<String, dynamic> pmap) {
     "_gap",
     "_horiz",
     "_hoverColor",
-    "_onTap",
     "_key",
     "_tapAction",
   ];
+  nl.addAll(tap);
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
@@ -901,7 +816,7 @@ ProcessPattern getIconTextPattern(Map<String, dynamic> pmap) {
 ProcessPattern getVisiblePattern(Map<String, dynamic> pmap) {
   Map<String, dynamic> map = {
     "_child": pmap["_child"],
-    "_visible": pmap["_visible"]
+    "_valueName": pmap["_valueName"]
   };
   return VisiblePattern(map);
 }
@@ -1009,11 +924,11 @@ ProcessPattern getTapListItemPattern(Map<String, dynamic> pmap) {
     "_mainAxisSpacing",
     "_crossAxisSpacing",
     "_childAspectRatio",
-    "_onTap",
     "_childPattern",
     "_childMap",
     "_itemRef"
   ];
+  nl.addAll(tap);
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
@@ -1044,9 +959,10 @@ ProcessPattern getListTilePattern(Map<String, dynamic> pmap) {
     "_hoverColor",
     "_autofocus",
     "_onLongPress",
-    "_onTap",
     "_tapAction",
+    "_leadingWidth",
   ];
+  nl.addAll(tap);
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
@@ -1063,7 +979,6 @@ ProcessPattern getPagingPattern(Map<String, dynamic> pmap) {
     "_physics",
     "_shrinkWrap",
     "_padding",
-    "_onTap",
     "_childPattern",
     "_childMap",
     "_refreshController",
@@ -1071,7 +986,9 @@ ProcessPattern getPagingPattern(Map<String, dynamic> pmap) {
     "_expandable",
     "_expandPattern",
     "_expandMap",
+    "_quilted",
   ];
+  nl.addAll(tap);
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
@@ -1112,6 +1029,7 @@ ProcessPattern getDropdownButtonPattern(Map<String, dynamic> pmap) {
     "_textStyle",
     "_icon",
     "_iconSize",
+    "_processEvent",
     "_inMap",
   ];
   for (String s in nl) {
@@ -1190,10 +1108,10 @@ ProcessPattern getTextIconRow(Map<String, dynamic> pmap) {
     "_icon",
     "_iconSize",
     "_iconColor",
-    "_onTap",
     "_iconFirst",
     "_fitted",
   ];
+  nl.addAll(tap);
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
@@ -1248,8 +1166,8 @@ ProcessPattern getFloatingActionPattern(Map<String, dynamic> pmap) {
     "_fgColor",
     "_icon",
     "_iconColor",
-    "_onTap",
   ];
+  nl.addAll(tap);
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
@@ -1260,10 +1178,17 @@ ProcessPattern getFloatingActionPattern(Map<String, dynamic> pmap) {
 }
 
 ProcessPattern getSwitchPattern(Map<String, dynamic> pmap) {
-  Map<String, dynamic> map = {
-    "_onOff": pmap["_onOff"],
-    "_onTap": pmap["_onTap"]
-  };
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_onOff",
+  ];
+  nl.addAll(tap);
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
   return SwitchPattern(map);
 }
 
@@ -1273,9 +1198,12 @@ ProcessPattern getCupertinoSwitchPattern(Map<String, dynamic> pmap) {
     "_switch",
     "_trackColor",
     "_activeColor",
-    "_onTap",
     "_tapAction",
+    "_processEvent",
+    "_inMap",
+    "_rxName",
   ];
+  nl.addAll(tap);
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
@@ -1286,12 +1214,163 @@ ProcessPattern getCupertinoSwitchPattern(Map<String, dynamic> pmap) {
 }
 
 ProcessPattern getCircleAvatarPattern(Map<String, dynamic> pmap) {
-  Map<String, dynamic> map = {
-    "_child": pmap["_child"],
-    "_radius": pmap["_radius"],
-    "_backgroundColor": pmap["_backgroundColor"]
-  };
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_child",
+    "_radius",
+    "_backgroundColor",
+    "_image",
+  ];
+  nl.addAll(tap);
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
   return CircleAvatarPattern(map);
+}
+
+ProcessPattern getObxDropdownPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_type",
+    "_value",
+    "_items",
+    "_rxName",
+    "_hint",
+    "_textStyle",
+    "_icon",
+    "_iconSize",
+    "_processEvent",
+    "_inMap",
+  ];
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  return ObxDropdownPattern(map);
+}
+
+ProcessPattern getElevatedButtonPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_child",
+  ];
+  nl.addAll(tap);
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  return ElevatedButtonPattern(map);
+}
+
+ProcessPattern getQRCodeGenPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {
+    "_text": pmap["_text"],
+    "_width": pmap["_width"],
+    "_height": pmap["_height"],
+    "_color": pmap["_color"],
+  };
+
+  return QRCodeGenPattern(map);
+}
+
+ProcessPattern getCalendarPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {
+    "_text": pmap["_text"],
+    "_width": pmap["_width"],
+    "_height": pmap["_height"],
+    "_color": pmap["_color"],
+  };
+
+  return CalendarPattern(map);
+}
+
+ProcessPattern getWrapTextPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_text",
+    "_locale",
+    "_maxLines",
+    "_textOverflow",
+    "_semanticsLabel",
+    "_softWrap",
+    "_strutStyle",
+    "_textStyle",
+    "_textAlign",
+    "_textDirection",
+    "_textHeightBehavior",
+    "_textScaleFactor",
+    "_textWidthBasis"
+  ];
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  return WrapTextPattern(map);
+}
+
+ProcessPattern getCheckBoxPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_activeColor",
+    "_checkColor",
+    "_fillColor",
+    "_actionColor",
+    "_shape",
+    "_side",
+  ];
+  nl.addAll(processEvent);
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  map["_parent"] = pmap;
+  return CheckBoxPattern(map);
+}
+
+ProcessPattern getCheckListPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_rxName",
+    "_data",
+  ];
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  map["_parent"] = pmap;
+  return CheckListPattern(map);
+}
+
+ProcessPattern getImageFitContainerPattern(Map<String, dynamic> pmap) {
+  Map<String, dynamic> map = {};
+  List<String> nl = [
+    "_image",
+    "_child",
+    "_boxFit",
+    "_width",
+    "_height",
+  ];
+  for (String s in nl) {
+    dynamic d = pmap[s];
+    if (d != null) {
+      map[s] = d;
+    }
+  }
+  map["_parent"] = pmap;
+  return ImageFitContainerPattern(map);
 }
 
 final Map<String, Function> getPrimePattern = {
@@ -1299,20 +1378,24 @@ final Map<String, Function> getPrimePattern = {
   "AppBar": getAppBarPattern,
   "Badge": getBadgePattern,
   "Bubble": getBubblePattern,
-  "Divider": getDividerPattern,
-  "Drawer": getDrawerPattern,
+  "Calendar": getCalendarPattern,
   "Card": getCardPattern,
   "Center": getCenterPattern,
+  "CheckBox": getCheckBoxPattern,
+  "CheckList": getCheckListPattern,
   "CircleAvatar": getCircleAvatarPattern,
   "ClipRRect": getClipRRectPattern,
   "ColorButton": getColorButtonPattern,
   "Column": getColumnPattern,
   "Container": getContainerPattern,
   "CupertinoSwitch": getCupertinoSwitchPattern,
+  "Divider": getDividerPattern,
   "DottedBorder": getDottedBorderPattern,
   "Draggable": getDraggablePattern,
+  "Drawer": getDrawerPattern,
   "DragTarget": getDragTargetPattern,
   "DropdownButton": getDropdownButtonPattern,
+  "ElevatedButton": getElevatedButtonPattern,
   "EntityForm": getEntityFormPattern,
   "Form": getFormPattern,
   "Expanded": getExpandedPattern,
@@ -1324,6 +1407,7 @@ final Map<String, Function> getPrimePattern = {
   "IconButton": getIconButtonPattern,
   "IconText": getIconTextPattern,
   "ImageAsset": getImageAssetPattern,
+  "ImageFitContainer": getImageFitContainerPattern,
   "ImageBanner": getImageBannerPattern,
   "IndexedStack": getIndexedStackPattern,
   "InteractiveViewer": getInteractiveViewerPattern,
@@ -1332,6 +1416,7 @@ final Map<String, Function> getPrimePattern = {
   "ListView": getListViewPattern,
   "MenuBubble": getMenuBubble,
   "Obx": getObxPattern,
+  "ObxDropdown": getObxDropdownPattern,
   "ObxOpacity": getObxOpacityPattern,
   "ObxProcess": getObxProcessPattern,
   "Opacity": getOpacityPattern,
@@ -1342,6 +1427,7 @@ final Map<String, Function> getPrimePattern = {
   "PageBar": getPageBarPattern,
   "Positioned": getPositionedPattern,
   "ProgressText": getProgressTextPattern,
+  "QRCodeGen": getQRCodeGenPattern,
   "RichText": getRichTextPattern,
   "Row": getRowPattern,
   "Scaffold": getScaffolPattern,
@@ -1360,9 +1446,7 @@ final Map<String, Function> getPrimePattern = {
   "TextField": getTextFieldPattern,
   "TextIconList": getTextIconList,
   "TextIconRow": getTextIconRow,
-  "ValueChildContainer": getValueChildContainerPattern,
-  "ValueText": getValueTextPattern,
-  "ValueTypeListener": getValueTypeListenerPattern,
   "Visible": getVisiblePattern,
   "Wrap": getWrapPattern,
+  "WrapText": getWrapTextPattern,
 };

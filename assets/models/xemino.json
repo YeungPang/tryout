@@ -37,8 +37,180 @@
             ]
         }
     },
+    "blueprint": {
+        "facts": {
+            "services": [
+                "Reinigung",
+                "Montage"
+            ]
+        },
+        "clauses": {
+            "mainContent": "(_editable ≔ true) ⋀ (_map ≔ mainMap) ⋀ ↲(mainDrawer)",
+            "mainMap": "↲([drawerListMap('customer'), drawerListMap('contact')])",
+            "contactDetail": [
+                "_item, _barTitle | τ('contactDetail') ⋀ (_barTitle ≔ _item['title']) ⋀ cardConst ⋀ (_chi ≔ [Φ(Text, {_text: _item['title'], _textStyle: ℛ(textStyle, Bold20)})]) ⋀ ",
+                "(_tName ≔ 'cf_email') ⋀ addItem ⋀ (∄(_item['cf_telefon']) ⋁ ",
+                "((_tel ≔ _item['cf_telefon']) ⋀ (_pref ≔ 'Tel') ⋀ (_chi ≪ telTile))) ⋀ (∄(_item['cf_mobile']) ⋁ ",
+                "((_tel ≔ _item['cf_mobile']) ⋀ (_pref ≔ 'Mobile') ⋀ (_chi ≪ telTile))) ⋀ (_tName ≔ 'cf_position__rolle') ⋀ addItem ⋀ ",
+                "(_chi ⊌ [_div, Φ(Text, {_text: _item['entryDate'], _textStyle: _dec})]) ⋀ mapPat(rowColHeader, (start, spaceEvenly, max, Ø)) ⋀ ",
+                "(_children ≔ _chi) ⋀ ⋓({_child: Φ(Padding, {_child: Φ(Column), _padding: ℛ(appRes, boxPadding)}), ",
+                "_elevation: ℛ(hratio, Ø, 0.01), _cardRadius: ℛ(hratio, Ø, 0.015)}) ⋀ ↲(Φ(SizedBox, {_child: Φ(Card), _width: ℛ(swratio, Ø, 0.95)}))"
+            ]
+        },
+        "objects": {
+            "customer": {
+                "title": "Title;key;required",
+                "_chAdr": "Addresse",
+                "cf_telefon": "Telefon;phone;;phone;red;toTel;_;Tel: ",
+                "cf_mobile": "Mobile;phone;;phone;red;toTel;_;Mobile: ",
+                "cf_homepage": "Home Page;url;;website;btnBlue;toUrl;_",
+                "cf_email": "Email;email;",
+                "cf_zusatz": "Zusatz",
+                "entryDate": "Entry day;;system;edit;btnBlue;route;formAction",
+                "icon": "customer",
+                "pageId": 6,
+                "columnId": 1,
+                "titleName": "Kunden",
+                "titleField": "title",
+                "subviewId": 7,
+                "subviewCols": [
+                    1,
+                    2,
+                    -1
+                ],
+                "subviewObj": [
+                    "contact",
+                    "notice",
+                    "timer"
+                ],
+                "subviewTabs": [
+                    "Kontakte",
+                    "Notizen",
+                    "Zeitmessung"
+                ],
+                "fields": [
+                    "title",
+                    "_chAdr",
+                    "cf_telefon",
+                    "cf_mobile",
+                    "cf_homepage",
+                    "cf_email",
+                    "cf_zusatz",
+                    "entryDate"
+                ],
+                "valueName": "contactPage",
+                "formAction": "_item | ↲({_tapAction: 'formScaffold', _map: {_object: 'customer', _formData: _item, _fsm: 'saveObjfsm'}})",
+                "map": "↲(objMap({_obj: customer}))",
+                "subviews": "↲(['contact.items', 'notice.items', 'timer.items'])",
+                "detail": "_item, _barTitle | (_barTitle ≔ _item['title']) ⋀ (_obj  ≔ customer) ⋀ ↲(tabSubView)",
+                "topCard": [
+                    "_item | cardConst ⋀ ⋓({_object: 'customer', _textStyle: _dec, _rinfo: {}, _split: true, ",
+                    "_attrList: [{_attr: 'cf_zusatz', _textStyle: ℛ(textStyle, 'Bold20')}, 'div', 'cf_adresse', ",
+                    "{_text: chAdr.getAddrLine2}, 'div', 'cf_telefon', 'div', 'cf_homepage', ",
+                    "'cf_email', 'div', 'entryDate']}) ⋀ (_child ≔ Φ(TextIconList)) ⋀ ↲(card)"
+                ]
+            },
+            "chAdr": {
+                "cf_adresse": "Strasse;;;map;position;addrToMap;onTap",
+                "cf_plz": "Plz",
+                "cf_ort": "Ort",
+                "cf_land": "Land",
+                "fields": [
+                    "cf_adresse",
+                    "cf_plz",
+                    "cf_ort",
+                    "cf_land"
+                ],
+                "getAddrLine2": "_item | ↲(_item['cf_land'] + ⊤(dash) + + _item['cf_plz'] + ' ' + _item['cf_ort'] + ' ' + ⊤(brac) + _item['cf_region'] + ⊤(ket))",
+                "onTap": "_item | ↲({_tapAction: (_item['cf_adresse'] + ⊤(comma) + ' ' + _item['cf_plz'] + ' ' + _item['cf_ort'])})"
+            },
+            "contact": {
+                "title": "Title;key;required",
+                "cf_vorname": "Vor Name",
+                "cf_telefon": "Telefon;phone;;phone;red;toTel;_;Tel: ",
+                "cf_mobile": "Mobile;phone;;phone;red;toTel;_;Mobile: ",
+                "cf_email": "Email;email",
+                "cf_position__rolle": "Rolle",
+                "_action": "Aktionen;ref",
+                "entryDate": "Entry day;;system;edit;btnBlue;route;formAction",
+                "icon": "contact",
+                "pageId": 22,
+                "columnId": 1,
+                "fields": [
+                    "title",
+                    "cf_vorname",
+                    "cf_telefon",
+                    "cf_mobile",
+                    "cf_email",
+                    "cf_position__rolle",
+                    "entryDate"
+                ],
+                "titleField": "title",
+                "titleName": "Kontakte",
+                "formAction": "_item | ↲({_tapAction: 'formScaffold', _map: {_object: 'contact', _index: 0, _formData: _item, _fsm: 'saveObjfsm'}})",
+                "map": "↲(objMap({_obj: contact}))",
+                "items": "_data | (∄(_data) ⋀ ↲(Φ(Container))) ⋁ (_pat ≔ 'contact.row') ⋀ ↲(itemList)",
+                "row": [
+                    "_item | cardConst ⋀ ⋓({_object: 'contact', _textStyle: _dec, _rinfo: {}, _split: true, ",
+                    "_attrList: [{_attr: 'title', _textStyle: ℛ(textStyle, 'Bold20')}, 'cf_email', ",
+                    "'div', 'cf_telefon', 'cf_mobile', 'div', 'cf_position__rolle', 'div', 'entryDate']}) ⋀ (_child ≔ Φ(TextIconList)) ⋀ ",
+                    "↲(card)"
+                ],
+                "detail": [
+                    "_item, _barTitle | τ('contactDetail') ⋀ (_barTitle ≔ _item['title']) ⋀ ↲(Φ(Column, {_children: [row]}))"
+                ]
+            },
+            "action": {
+                "cf_aktionen": "Aktion"
+            },
+            "notice": {
+                "title": "Title;key;required",
+                "cf_notiz": "Notiz",
+                "cf_kontakt": "Kontakt",
+                "entryDate": "Entry day;;system;edit;btnBlue;route;formAction",
+                "fields": [
+                    "title",
+                    "cf_notiz",
+                    "cf_kontakt",
+                    "entryDate"
+                ],
+                "formAction": "_item | ↲({_tapAction: 'formScaffold', _map: {_object: 'notice', _formData: _item, _fsm: 'saveObjfsm'}})",
+                "getContact": [
+                    "_item | (∄(_item['cf_kontakt']) ⋀ ↲(Ø)) ⋁ ((_data ≔ getRelation({ref: _item['cf_kontakt'], relId: _item['id']})) ⋀ ",
+                    "⋀ (_pat ≔ 'textButtonTile') ⋀ ↲(Φ(Wrap, {_children: itItems, _alignment: decode(wrapAlignment, spaceBetween)})))"
+                ],
+                "items": "_data | (∄(_data) ⋀ ↲(Φ(Container))) ⋁ (_pat ≔ 'notice.row') ⋀ ↲(itemList)",
+                "row": [
+                    "_item | cardConst ⋀ ⋓({_object: 'notice', _textStyle: _dec, _rinfo: {}, _split: true, ",
+                    "_attrList: [{_attr: 'title', _textStyle: ℛ(textStyle, 'Bold20')}, {_pat: 'notice.getContact'}, 'cf_notiz', ",
+                    "'div', 'entryDate']}) ⋀ (_child ≔ Φ(TextIconList)) ⋀ ↲(card)"
+                ]
+            },
+            "timer": {
+                "getTop": [
+                    "_pid | _children ≔ [Φ(DropdownButton, {_items: ['Reinigung', 'Montage'], _hint: ⊤('select one'), _cacheName: (_pid + 'Cache'), ",
+                    "_textStyle: _textStyle, _value: _value, _fsmName: 'timerService', _inMap: {_company: _pid}}), ",
+                    "Φ(CupertinoSwitch)] ⋀ (_alignment ≔ 'spaceBetween') ⋀ ↲(padRow)"
+                ],
+                "getBottom": [
+                    "_pid | cardConst ⋀ (_vn ≔ ('trackedTime' + _pid)) ⋀ (_children ≔ labelOText('trackedTime', _dec, _dec, _vn)) ⋀ ",
+                    "(_width ≔ ℛ(wratio, Ø, 0.47)) ⋀ mapPat(rowColHeader, (center, spaceBetween, max, Ø)) ⋀ (_child ≔ Φ(Row)) ⋀ (_mt ≔ Φ(SizedBox)) ⋀ ",
+                    "(_children ≔ [Φ(Icon, {_icon: 'save', _iconColor: 'grey'}), Φ(Icon, {_icon: 'delete', _iconColor: 'grey'})]) ⋀ (_child ≔ Φ(Row)) ⋀ ",
+                    "(_width ≔ ℛ(sizeScale, Ø, 60.0)) ⋀ (_children ≔ [_mt, Φ(Container)]) ⋀ (_alignment ≔ 'spaceBetween') ⋀ ↲(padRow)"
+                ],
+                "items": "_data, _pid | (∄(_data) ⋀ ↲(trackRow)) ⋁ (_pat ≔ 'timer.row') ⋀ ↲(itemList)",
+                "trackRow": [
+                    "_pid | cardConst ⋀ timerInit(_pid) ⋀ (_tr ≔ timerSERows(_pid, _dec, _dec)) ⋀ ",
+                    "⋓({_object: 'timer', _textStyle: _dec, _rinfo: {}, _split: true, _attrList: [getTop, 'div', _tr, 'div', ",
+                    "getBottom]}) ⋀ (_child ≔ Φ(TextIconList)) ⋀ ↲(card)"
+                ]
+            }
+        }
+    },
     "patterns": {
         "facts": {
+            "objStack": [],
+            "first": true,
             "patHeader": [
                 "hratio",
                 "wratio",

@@ -1,11 +1,16 @@
 import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_networkimage_2/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:json_theme/json_theme.dart';
 import 'package:tryout/model/locator.dart';
+import 'package:tryout/resources/basic_resources.dart';
+import 'package:tryout/util/map_util.dart';
 import '../resources/fonts.dart';
 import './pattern.dart';
 
@@ -266,8 +271,9 @@ class TextPattern extends ProcessPattern {
           break;
       }
     }
+    String txt = map["_text"] ?? "???";
     return Text(
-      map["_text"],
+      txt,
       locale: map["_locale"],
       maxLines: map["_maxLines"],
       overflow: map["_textOverflow"],
@@ -288,10 +294,37 @@ class ImageAssetPattern extends ProcessPattern {
   ImageAssetPattern(Map<String, dynamic> map) : super(map);
   @override
   Widget getWidget({String? name}) {
-    String _name = map["_name"];
+    dynamic _img = map["_image"];
+    if ((_img is XFile) || (_img is File)) {
+      File f = (_img is XFile) ? File(_img.path) : _img;
+      return Image.file(
+        f,
+        width: map["_width"],
+        height: map["_height"],
+      );
+    }
+    if (_img is Uint8List) {
+      return Image.memory(_img);
+    }
+    String _name = (_img == null) ? map["_name"] : _img;
+    dynamic _fit = map['_boxFit'];
+    if (_fit != null) {
+      _fit = (_fit is String)
+          ? ThemeDecoder.decodeBoxFit(_fit, validate: false)
+          : _fit;
+    }
     if (_name.contains("http")) {
       return Image(
         image: CachedNetworkImageProvider(_name),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
         frameBuilder: map["_frameBuilder"],
         errorBuilder: map["_errorBuilder"],
         semanticLabel: map["_semanticLabel"],
@@ -300,7 +333,7 @@ class ImageAssetPattern extends ProcessPattern {
         height: map["_height"],
         color: map["_color"],
         colorBlendMode: map["_colorBlendMode"],
-        fit: map["_boxFit"],
+        fit: _fit,
         alignment: map["_alignment"] ?? Alignment.center,
         repeat: map["_repeat"] ??= ImageRepeat.noRepeat,
         centerSlice: map["_centerSlice"],
@@ -321,7 +354,7 @@ class ImageAssetPattern extends ProcessPattern {
         height: map["_height"],
         color: map["_color"],
         colorBlendMode: map["_colorBlendMode"],
-        fit: map["_boxFit"],
+        fit: _fit,
         alignment: map["_alignment"] ?? Alignment.center,
         repeat: map["_repeat"] ??= ImageRepeat.noRepeat,
         centerSlice: map["_centerSlice"],
@@ -391,7 +424,7 @@ class ContainerPattern extends ProcessPattern {
     return Container(
         key: map["_key"],
         child: w,
-        color: map["_color"],
+        color: getMapColor(map),
         alignment: map["_alignment"],
         clipBehavior: map["_clipBehavior"] ?? Clip.none,
         constraints: map["_boxConstraints"],
@@ -754,10 +787,73 @@ class CircleAvatarPattern extends ProcessPattern {
   @override
   Widget getWidget({String? name}) {
     Widget? w = getPatternWidget(map["_child"]);
+    dynamic image = map["_image"];
+    ImageProvider? ip = getImageProvider(image);
+/*     if (image != null) {
+      if (image is String) {
+        if (image.contains("http")) {
+          ip = CachedNetworkImageProvider(image);
+        } else {
+          ip = AssetImage(image);
+        }
+      } else if (image is Uint8List) {
+        ip = MemoryImage(image);
+      } else if ((image is File) || (image is XFile)) {
+        File f = (image is XFile) ? File(image.path) : image;
+        ip = FileImage(f);
+      }
+    } */
+    dynamic bgColor = map["_backgroundColor"];
+    bgColor = (bgColor is String) ? getColor(bgColor) : Colors.white;
+    Color bgc = bgColor ?? Colors.white;
     return CircleAvatar(
+      backgroundImage: ip,
       radius: map["_radius"] ?? 40.0 * model.sizeScale,
-      backgroundColor: map["_backgroundColor"] ?? Colors.white,
-      child: w!,
+      backgroundColor: bgc,
+      child: w,
     );
+  }
+}
+
+class WrapTextPattern extends ProcessPattern {
+  WrapTextPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    TextPattern tp = TextPattern(map);
+    return Row(
+      children: [
+        Expanded(
+          child: tp.getWidget(),
+        )
+      ],
+    );
+  }
+}
+
+class ImageFitContainerPattern extends ProcessPattern {
+  ImageFitContainerPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    Widget? w = getPatternWidget(map["_child"]);
+    dynamic image = map["_image"];
+    ImageProvider ip = getImageProvider(image)!;
+    dynamic _fit = map['_boxFit'];
+    if (_fit != null) {
+      _fit = (_fit is String)
+          ? ThemeDecoder.decodeBoxFit(_fit, validate: false)
+          : _fit;
+    }
+    return InteractiveViewer(
+        child: Container(
+      width: map["_width"],
+      height: map["_height"],
+      decoration: BoxDecoration(
+          image: DecorationImage(
+        fit: _fit ?? BoxFit.fitWidth,
+        alignment: FractionalOffset.center,
+        image: ip,
+      )),
+      child: w,
+    ));
   }
 }

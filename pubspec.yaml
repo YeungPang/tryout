@@ -55,6 +55,14 @@ dependencies:
   jiffy: ^5.0.0
   xml: ^6.1.0
   flutter_switch:
+  flutter_barcode_scanner:
+  barcode_widget:
+  calendar_view:
+  flutter_colorpicker:
+  intl:
+  image_picker:
+  signature:
+  flutter_staggered_grid_view:
   webxene_core:
     path: ../webxene_core
 

@@ -50,6 +50,12 @@ class AgentActions extends AppActions {
         return a.process(pe);
       case "decode":
         return controlAgent.decode(input, vars!);
+      case "getLangText":
+        String str = input;
+        if (model.lang != model.deflang) {
+          str = model.lang + str;
+        }
+        return model.map["text"][str];
       case "dataList":
         if ((input is List<dynamic>) && (input.length == 2)) {
           return getDataList(input[0], input[1]);
@@ -192,20 +198,31 @@ class AgentActions extends AppActions {
             _map.forEach((k, v) {
               if (k != "extending") {
                 String? s = (v is String) ? v : null;
-                if ((s == null) && (v is List<dynamic>) && (v.isNotEmpty)) {
-                  int l = v.length - 1;
-                  s = (v[l] is String) ? v[l] : null;
-                }
+                _m[k] = v;
                 String _k = key + '.' + k;
-                if ((s != null) &&
-                    (s.contains('↲') ||
-                        s.contains('⋀') ||
-                        s.contains('≔') ||
-                        s.contains('⋁'))) {
-                  clauses[_k] = v;
-                  _m[k] = _k;
+                if ((s == null) && (v is List<dynamic>) && (v.isNotEmpty)) {
+                  for (var sl in v) {
+                    int l = v.length - 1;
+                    s = (sl is String) ? sl : null;
+                    if ((s != null) &&
+                        (s.contains('↲') ||
+                            s.contains('⋀') ||
+                            s.contains('≔') ||
+                            s.contains('⋁'))) {
+                      clauses[_k] = v;
+                      _m[k] = _k;
+                      break;
+                    }
+                  }
                 } else {
-                  _m[k] = v;
+                  if ((s != null) &&
+                      (s.contains('↲') ||
+                          s.contains('⋀') ||
+                          s.contains('≔') ||
+                          s.contains('⋁'))) {
+                    clauses[_k] = v;
+                    _m[k] = _k;
+                  }
                 }
               }
             });
@@ -266,16 +283,6 @@ class AgentActions extends AppActions {
       case "isNull":
       case "Ø":
         return (input == null) || (input == nil);
-      case "noContent":
-        //case "∄":
-        if (input is String) {
-          return input.isEmpty;
-        }
-        if (input is List<dynamic>) {
-          return input.isEmpty;
-        }
-        return (input == null) || (input == nil);
-
       case "buildDialog":
         if (input == null) {
           return false;
@@ -320,7 +327,7 @@ class AgentActions extends AppActions {
         List<dynamic> sl = model.stack.last;
         model.stack.removeLast();
         return sl;
-      case "createNotifier":
+/*       case "createNotifier":
         return createNotifier(input);
       case "setNotiValue":
         return setNotiValue(input);
@@ -340,7 +347,7 @@ class AgentActions extends AppActions {
             return true;
           }
         }
-        return false;
+        return false; */
       case "handleList":
         return handleList(input, vars!);
       case "changeTheme":
@@ -641,6 +648,8 @@ class AgentActions extends AppActions {
         return text[spec];
       case "schema":
         return schema[spec];
+      case "infinity":
+        return double.infinity;
       default:
         return resources[res];
     }
@@ -651,7 +660,8 @@ class AgentActions extends AppActions {
       return;
     }
     m["_dateTime"] = d;
-    ProcessEvent pe = ProcessEvent(m["_name"], map: m);
+    String event = m["_processEvent"] ?? "setTimerEvent";
+    ProcessEvent pe = ProcessEvent(event, map: {"_map": m});
     Agent a = getAgent("pattern");
     return a.process(pe);
   }
@@ -701,7 +711,9 @@ class ControlAgent extends Agent {
           List<String> l = lp.vars.keys.toList();
           for (String k in l) {
             //if (event.map![k] == null) {
-            event.map![k] = lp.vars[k];
+            if (lp.vars[k] != null) {
+              event.map![k] = lp.vars[k];
+            }
             //}
           }
         }

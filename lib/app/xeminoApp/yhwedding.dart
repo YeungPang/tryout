@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webxene_core/auth_manager.dart';
 import 'package:webxene_core/instance_manager.dart';
 import 'package:webxene_core/group_manager.dart';
+import 'package:webxene_core/mote_manager.dart';
+import 'package:webxene_core/motes/attachment.dart';
 import 'package:webxene_core/motes/filter.dart';
 import 'package:webxene_core/motes/mote.dart';
 import 'package:webxene_core/motes/mote_column.dart';
@@ -15,7 +18,7 @@ import '../../util/test.dart';
 
 const int targetGroupId = 1;
 
-crmAppInit() {
+weddingAppInit() {
   Map<String, Function> func = {
     "addrToMap": MapUtil.addrToMap,
     "toTel": MapUtil.toTel,
@@ -33,6 +36,11 @@ crmAppInit() {
     "getText": getText,
     "getTest": getTest,
     "imagePicker": imagePicker,
+    "xFileToUint8List": xFileToUint8List,
+    "addAttachment": addAttachmentToMote,
+    "remapData": remapData,
+    "updateMote": updateMote,
+    "mapList": mapList,
   };
   model.appActions.addFunctions(func);
 }
@@ -66,7 +74,7 @@ Future<List<Mote>> _getGroup(Map<String, dynamic> m) async {
         targetGroup.orderedMenu.firstWhere((p) => p.id == targetPageId);
     final fullPage = await GroupManager()
         .fetchPageAndMotes(targetPage.id, forceRefresh: true);
-    final targetColumn = fullPage.columns[targetColumnId]!;
+    final targetColumn = fullPage.columns.values.first;
     targetColumn.filters.clear();
     targetColumn.calculateMoteView();
     m["col"] = targetColumn;
@@ -84,6 +92,10 @@ getGroupList(Map<String, dynamic> m) {
     _updateList(m, value);
   } else {
     _getGroup(m).then((List<Mote> value) {
+      String? cacheName = m["_cacheName"];
+      if (cacheName != null) {
+        resxController.setCache(cacheName, value);
+      }
       _updateList(m, value);
     });
   }
@@ -226,17 +238,66 @@ sort(Map<String, dynamic> m) {
   }
 }
 
-_updateList(Map<String, dynamic> m, dynamic value) {
+addAttachmentToMote(Map<String, dynamic> m) async {
+  String cacheName = m["_cacheName"];
+  List<Mote> lm = resxController.getCache(cacheName);
+  int inx = m["_index"];
+  Mote mote = lm[inx];
+  final value = m["_value"];
+  Attachment newAttachment =
+      Attachment.newFromByteArray("samplefile.txt", "text/plain", value);
+  await newAttachment.saveAttachmentRemotely();
+  mote.attachments.add(newAttachment);
+  mote.attachments.removeWhere((attach) =>
+      attach.filename == 'samplefile.txt' && attach.id != newAttachment.id);
+  MoteManager().saveMote(mote);
+}
+
+updateMote(Map<String, dynamic> m) {
+  String cacheName = m["_cacheName"];
+  List<Mote> lm = resxController.getCache(cacheName);
+  int inx = m["_index"];
+  Mote mote = lm[inx];
+  Map<String, dynamic> p = mote.payload;
+  Map<String, dynamic> updates = m["_updates"];
+  updates.forEach((key, value) {
+    p[key] = value;
+  });
+  MoteManager().saveMote(mote);
+}
+
+_updateList(Map<String, dynamic> m, dynamic value) async {
   String name = m["_groupName"];
   ProcessEvent pe = resxController.getCache(name + "Event");
   Agent a = model.appActions.getAgent("pattern");
+  int i = 0;
   List<dynamic> ld = (value is List<Mote>)
       ? value.map((e) {
-          Map<String, dynamic> p = e.payload;
+          Map<String, dynamic> p = {};
+          p.addAll(e.payload);
+          p["inx"] = i++;
           _addIdTimestamp(e, p);
           return p;
         }).toList()
       : value;
+  List<dynamic>? at = m["_attachment"];
+  if (at != null) {
+    if (value is List<Mote>) {
+      int i = 0;
+      for (var e in value) {
+        if (e.attachments.isNotEmpty) {
+          int l = e.attachments.length;
+          for (int j = 0; j < l; j++) {
+            await e.attachments[j].loadAttachment();
+            Uint8List? data = e.attachments[j].byteArray;
+            int k = (j >= at.length) ? (at.length - 1) : j;
+            ld[i][at[k]] = data;
+          }
+        }
+        i++;
+      }
+    }
+  }
   if (pe.map == null) {
     pe.map = {"_value": ld};
   } else {

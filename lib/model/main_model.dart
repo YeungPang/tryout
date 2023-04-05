@@ -1,9 +1,11 @@
+import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import '../builder/pattern.dart';
+import 'package:flutter/foundation.dart';
 
 class MainModel {
   //final String mainModelName = "assets/models/geo.json";
-
+  late String mainModelName;
   double screenHeight = 812.0;
   double screenWidth = 375.0;
   late double appBarHeight;
@@ -21,6 +23,9 @@ class MainModel {
   BuildContext? context;
   Map<String, dynamic> stateData = {};
   Map<String, dynamic> get map => stateData["map"];
+  String get lang => map["user"]["lang"];
+  String get deflang => map["user"]["deflang"];
+  EventController<Event> eventController = EventController<Event>();
 
   List<List<dynamic>> stack = [];
 
@@ -32,8 +37,12 @@ class MainModel {
     _count++;
   }
 
-  Future<String> getJson(BuildContext context, String mainModelName) {
+  Future<String> getJson(BuildContext context) {
     return DefaultAssetBundle.of(context).loadString(mainModelName);
+  }
+
+  setJson(String mjson) {
+    mainModelName = mjson;
   }
 
   init(BuildContext context) {
@@ -87,4 +96,20 @@ class MainModel {
     size10 = 10.0 * sizeScale;
     size20 = 20.0 * sizeScale;
   }
+}
+
+@immutable
+class Event {
+  final String title;
+
+  const Event({this.title = "Title"});
+
+  @override
+  bool operator ==(Object other) => other is Event && title == other.title;
+
+  @override
+  int get hashCode => super.hashCode;
+
+  @override
+  String toString() => title;
 }

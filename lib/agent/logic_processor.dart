@@ -196,7 +196,8 @@ class LogicProcessor {
             r = handlePred(e, expr[++i]);
           } else {
             if (e[0] == '_') {
-              r = vars[e] ?? e;
+              r = vars[e];
+              //r = vars[e] ?? e;
               if (r is String) {
                 r = handlePred(e, null);
               }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tryout/model/locator.dart';
 import 'package:webxene_core/auth_manager.dart';
 import 'package:webxene_core/instance_manager.dart';
 import 'package:webxene_core/widgets/spinning_icon.dart';
@@ -38,8 +37,7 @@ class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   TextEditingController loginName = TextEditingController();
   TextEditingController loginPassword = TextEditingController();
-  //String serverSelection = "Development";
-  String serverSelection = "Production";
+  bool useProductionServer = true;
 
   late AnimationController _animationController; // Animations for hero icon
   final LoginScreenController controller = LoginScreenController();
@@ -58,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen>
 
     // TODO: Initialize with testing server HTTP only for now!
     // InstanceManager().setupInstance("netxene.cirii.org", { 'instance': {'DEBUG_HTTP': true }});
+    useProductionServer = false;
 
     controller.mirrorState(AuthManager().state);
     _animationController = AnimationController(
@@ -77,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen>
     _animationController.repeat();
 
     List<Widget> stateWidgets = [];
-    print("Building context for authState: " +
+    debugPrint("Building context for authState: " +
         controller.authState.value.toString());
     switch (controller.authState.value) {
       case AuthState.init:
@@ -87,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen>
         stateWidgets = _buildKeyPrompt(context);
         break;
       default:
-        print("Default fallthrough!");
+        debugPrint("Default fallthrough!");
         break;
     }
 
@@ -115,30 +114,6 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   List<Widget> _buildLogin(BuildContext context) {
-    final selServer = DropdownButtonFormField<String>(
-      value: serverSelection,
-      icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
-      elevation: 16,
-      style: const TextStyle(color: Colors.black),
-      decoration: const InputDecoration(
-        prefixIcon: Icon(Icons.storage, color: Colors.black87),
-        prefixText: "Server: ",
-        prefixStyle: TextStyle(color: Colors.black),
-      ),
-      onChanged: (String? newValue) {
-        setState(() {
-          serverSelection = newValue!;
-        });
-      },
-      items: <String>['Development', 'Testing', 'Production']
-          .map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-    );
-
     final txtLoginName = TextFormField(
       controller: loginName,
       decoration: const InputDecoration(
@@ -147,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen>
         labelText: "Login email",
         labelStyle: TextStyle(color: Colors.black87),
       ),
-      style: TextStyle(),
+      style: const TextStyle(),
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (String? value) {
         return (value != null && value.contains('@'))
@@ -204,49 +179,27 @@ class _LoginScreenState extends State<LoginScreen>
           return;
         }
 
-        late String instance;
-        late String uName;
-        late String pw;
-        if (loginName.text.contains("crm")) {
-          instance = "crm.sevconcept.ch";
-          uName = "demo-user@sevconcept.ch";
-          pw = "demouser123";
-          //resxController.setCache("mainjson", "assets/models/crm.json");
-          model.setJson("assets/models/crm.json");
+        InstanceManager().setupInstance("crm.sevconcept.ch", {
+          'instance': {'DEBUG_HTTP': false}
+        });
+
+/*         if (useProductionServer) {
+          InstanceManager().setupInstance("crm.sevconcept.ch", {
+            'instance': {'DEBUG_HTTP': false}
+          });
         } else {
-          instance = "yhwedding.webxene.com";
-          uName = "admin@webxene.com";
-          pw = "aant87Kv!!";
-          //resxController.setCache("mainjson", "assets/models/wedding.json");
-          model.setJson("assets/models/wedding.json");
-        }
-        switch (serverSelection) {
-          case "Development":
-            InstanceManager().setupInstance("netxene.cirii.org", {
-              'instance': {'DEBUG_HTTP': true}
-            });
-            break;
-          case "Testing":
-            InstanceManager().setupInstance("demo.xemino.ch", {
-              'instance': {'DEBUG_HTTP': false}
-            });
-            break;
-          case "Production":
-            InstanceManager().setupInstance(instance, {
-              'instance': {'DEBUG_HTTP': false}
-            });
-            break;
-          default:
-            throw "Invalid server selection in login screen!";
-        }
+          InstanceManager().setupInstance("netxene.cirii.org", {
+            'instance': {'DEBUG_HTTP': true}
+          });
+        } */
 
         AuthManager()
-//            .runSingleStageLogin(loginName.text, loginPassword.text)
-            .runSingleStageLogin(uName, pw)
+            //.runSingleStageLogin(loginName.text, loginPassword.text)
+            .runSingleStageLogin("demo-user@sevconcept.ch", "demouser123")
             .then((_) {
           if (AuthManager().state == AuthState.complete) {
-            // Navigator.pushNamed(context,
-            //     serverSelection != "Development" ? '/sample' : '/home');
+            // Navigator.pushNamed(
+            //     context, useProductionServer ? '/sample' : '/home');
             Get.toNamed("/sample");
           }
         });
@@ -270,40 +223,21 @@ class _LoginScreenState extends State<LoginScreen>
       ),
     );
 
-    final topDevFill = Container(
+    final topDebugFill = Container(
       decoration: const BoxDecoration(
           color: Colors.black45,
           backgroundBlendMode: BlendMode.darken,
           borderRadius: BorderRadius.all(Radius.circular(7))),
       height: 40,
       child: TextButton.icon(
-        icon: const Icon(Icons.login_sharp),
+        icon: const Icon(Icons.badge_sharp),
         label: Container(
-          child: const Text("DEV"),
+          child: const Text("Fill Test Login"),
         ),
         onPressed: () {
-          serverSelection = "Development";
+          useProductionServer = false;
           loginName.text = "alice@example.com";
           loginPassword.text = "alice";
-        },
-      ),
-    );
-
-    final topTestFill = Container(
-      decoration: const BoxDecoration(
-          color: Colors.black45,
-          backgroundBlendMode: BlendMode.darken,
-          borderRadius: BorderRadius.all(Radius.circular(7))),
-      height: 40,
-      child: TextButton.icon(
-        icon: const Icon(Icons.login_sharp),
-        label: Container(
-          child: const Text("TEST"),
-        ),
-        onPressed: () {
-          serverSelection = "Testing";
-          loginName.text = "demo@xemino.ch";
-          loginPassword.text = "demouser123";
         },
       ),
     );
@@ -315,26 +249,27 @@ class _LoginScreenState extends State<LoginScreen>
           borderRadius: BorderRadius.all(Radius.circular(7))),
       height: 40,
       child: TextButton.icon(
-        icon: const Icon(Icons.login_sharp),
+        icon: const Icon(Icons.verified_sharp),
         label: Container(
-          child: const Text("PROD"),
+          child: const Text("Fill Prod. Login"),
         ),
         onPressed: () {
-          serverSelection = "Production";
-          loginName.text = "admin@webxene.com";
-          loginPassword.text = "aant87Kv!!";
+          useProductionServer = true;
+          loginName.text = "demo-user@sevconcept.ch";
+          loginPassword.text = "demouser123";
         },
       ),
     );
 
     final topAllFill = Row(
-      children: [topDevFill, topTestFill, topProdFill],
+      children: [topDebugFill, topProdFill],
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     );
 
     return [
-      topWarning, topAllFill, const Padding(padding: EdgeInsets.all(10)),
-      //selServer, txtLoginName, txtLoginPassword, const Padding(padding: EdgeInsets.all(10)),
+      topWarning,
+      topAllFill,
+      const Padding(padding: EdgeInsets.all(10)),
       txtLoginName,
       txtLoginPassword,
       const Padding(padding: EdgeInsets.all(10)),

@@ -1,19 +1,18 @@
+import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart';
 import 'package:get/get.dart';
-import 'package:tryout/resources/icons.dart';
+import '../resources/icons.dart';
+import '../util/map_util.dart';
 import './pattern.dart';
-import './std_pattern.dart';
 import '../model/locator.dart';
 import '../resources/basic_resources.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../resources/fonts.dart';
-import 'package:get/get.dart';
-import '../resources/basic_resources.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class DraggablePattern extends ProcessPattern {
   DraggablePattern(Map<String, dynamic> map) : super(map);
@@ -108,9 +107,6 @@ class InTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     FocusNode? fn = map["_focusNode"];
-    // if (fn != null) {
-    //   map["_autofocus"] = true;
-    // }
     return _buildTextField(context, map, fn);
   }
 }
@@ -118,11 +114,7 @@ class InTextField extends StatelessWidget {
 Widget _buildTextField(
     BuildContext context, Map<String, dynamic> map, FocusNode? fn) {
   TextEditingController tc = map["_textController"];
-  // Map<String, dynamic> pMap;
-  // pMap = map["_parent"];
-  // if (pMap != null) {
-  //   pMap["_textEditingController"] = tc;
-  // }
+
   bool clear = map["_clear"] ?? false;
   if (clear) {
     tc.text = '';
@@ -147,6 +139,11 @@ Widget _buildTextField(
     expands: map["_expands"] ?? false,
     onSubmitted: map["_onSubmitted"],
     keyboardType: map["_keyboardType"],
+    onTap: () {
+      if (fn != null) {
+        fn.requestFocus();
+      }
+    },
     decoration: InputDecoration(
       border: map["_inputBorder"] ?? const OutlineInputBorder(),
       icon: ic,
@@ -170,10 +167,14 @@ _completeEdit(
     dynamic actions = map["_complete"];
     if (actions != null) {
       if (actions is ProcessEvent) {
-        model.appActions.doFunction(actions.name, actions.map, actions.map);
+        Map<String, dynamic> _map = actions.map ?? {};
+        _map['_text'] = text;
+        model.appActions.doFunction(actions.name, actions.map, _map);
       } else if (actions is Map<String, dynamic>) {
-        model.appActions.doFunction(
-            actions["_func"], actions["_tapAction"], actions["_map"]);
+        Map<String, dynamic> _map = actions["_map"] ?? {};
+        _map['_text'] = text;
+        model.appActions
+            .doFunction(actions["_func"], actions["_tapAction"], _map);
       }
     }
     bool clear = map["_clear"] ?? false;
@@ -210,15 +211,11 @@ class _StateTextField extends State<StateTextField> {
   void initState() {
     map = widget.map;
     fn = map["_focusNode"];
-    map["_autofocus"] = true;
     super.initState();
   }
 
   @override
   void dispose() {
-/*     if (fn != null) {
-      fn!.dispose();
-    } */
     super.dispose();
   }
 
@@ -241,77 +238,6 @@ class InTextFieldPattern extends ProcessPattern {
   }
 }
 
-class ValueText<T> extends StatelessWidget {
-  final Map<String, dynamic> map;
-
-  const ValueText(this.map, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<T>(
-      valueListenable: map["_notifier"],
-      builder: (BuildContext context, T value, Widget? child) =>
-          _getListenerWidget(value),
-    );
-  }
-
-  Widget _getListenerWidget(T value) {
-    Function? f = map["_converter"];
-    map["_text"] = (f != null) ? f(value, map) : value.toString();
-    ProcessPattern p = TextPattern(map);
-    map["widget"] = p.getWidget();
-    return map["widget"];
-  }
-}
-
-class ValueTextPattern<T> extends ProcessPattern {
-  ValueTextPattern(Map<String, dynamic> map) : super(map);
-  @override
-  Widget getWidget({String? name}) {
-    return ValueText<T>(map);
-  }
-}
-
-class ValueChildContainer extends StatelessWidget {
-  final Map<String, dynamic> map;
-
-  const ValueChildContainer(this.map, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<ProcessPattern>(
-      valueListenable: map["_childNoti"],
-      builder: (BuildContext context, ProcessPattern value, Widget? child) =>
-          _getContainer(value),
-    );
-  }
-
-  Widget _getContainer(ProcessPattern value) {
-    Widget? w = getPatternWidget(value);
-    return Container(
-        child: w,
-        color: map["_color"],
-        alignment: map["_alignment"],
-        clipBehavior: map["_clipBehavior"] ?? Clip.none,
-        constraints: map["_boxConstraints"],
-        decoration: map["_decoration"],
-        foregroundDecoration: map["_foregroundDecoration"],
-        width: map["_width"],
-        height: map["_height"],
-        margin: map["_margin"],
-        padding: map["_padding"],
-        transform: map["_transform"]);
-  }
-}
-
-class ValueChildContainerPattern extends ProcessPattern {
-  ValueChildContainerPattern(Map<String, dynamic> map) : super(map);
-  @override
-  Widget getWidget({String? name}) {
-    return ValueChildContainer(map);
-  }
-}
-
 class TapItem extends StatelessWidget {
   final Map<String, dynamic> map;
 
@@ -329,10 +255,18 @@ tapAction(Map<String, dynamic> map) {
 
 _onTap(BuildContext? context, Map<String, dynamic> map) {
   dynamic onTap = map["_onTap"];
+  if (onTap is ProcessEvent) {
+    processValue(map, null);
+    return;
+  }
   String? func;
   dynamic m;
   Map<String, dynamic>? _map;
   if (onTap is Map<String, dynamic>) {
+    if (onTap["_processEvent"] != null) {
+      processValue(onTap, null);
+      return;
+    }
     func = onTap["_func"];
     m = onTap["_tapAction"];
     _map = onTap["_map"];
@@ -374,9 +308,9 @@ class BadgePattern extends ProcessPattern {
     Widget? bw = getPatternWidget(map["_badgeContext"]);
     return Badge(
       badgeContent: bw,
-      badgeColor: map["_badgeColor"],
+      //badgeColor: map["_badgeColor"],
       showBadge: map["_showBadge"] ?? true,
-      padding: const EdgeInsets.all(0.0),
+      //padding: const EdgeInsets.all(0.0),
       child: w,
     );
   }
@@ -398,20 +332,6 @@ class CardPattern extends ProcessPattern {
       margin: map["_margin"],
       clipBehavior: map["_clipBehavior"],
       child: w,
-    );
-  }
-}
-
-class ValueOpacityPattern extends ProcessPattern {
-  ValueOpacityPattern(Map<String, dynamic> map) : super(map);
-  @override
-  Widget getWidget({String? name}) {
-    return ValueListenableBuilder<double>(
-      valueListenable: map["_notifier"],
-      builder: (BuildContext context, double value, Widget? child) => Opacity(
-        child: getPatternWidget(map["_child"]),
-        opacity: value,
-      ),
     );
   }
 }
@@ -521,11 +441,11 @@ class ColorButton extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [map["_beginColor"], map["_endColor"]]));
-    Color? c = map["_color"];
-    BoxBorder? b = (map["_borderColor"] == null)
+    Color? c = getColor(map["_color"]);
+    Color? bc = getColor(map["_borderColor"]);
+    BoxBorder? b = (bc == null)
         ? null
-        : Border.all(
-            color: map["_borderColor"], width: map["_borderWidth"] ?? 1.0);
+        : Border.all(color: bc, width: map["_borderWidth"] ?? 1.0);
 
     BoxDecoration box = BoxDecoration(
       borderRadius: BorderRadius.circular(borderRadius),
@@ -562,37 +482,6 @@ class ColorButtonPattern extends ProcessPattern {
   }
 }
 
-class ValueTypeListener<T> extends StatelessWidget {
-  final Map<String, dynamic> map;
-
-  const ValueTypeListener(this.map, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<T>(
-      valueListenable: map["_notifier"],
-      builder: (BuildContext context, T value, Widget? child) =>
-          _getListenerWidget(value),
-    );
-  }
-
-  Widget _getListenerWidget(T value) {
-    ProcessPattern child = map["_child"];
-    String? key = map["_notifierKey"];
-    key ??= (value is List<dynamic>) ? "_children" : "_child";
-    child.map[key] = value;
-    return getPatternWidget(child)!;
-  }
-}
-
-class ValueTypeListenerPattern<T> extends ProcessPattern {
-  ValueTypeListenerPattern(Map<String, dynamic> map) : super(map);
-  @override
-  Widget getWidget({String? name}) {
-    return ValueTypeListener<T>(map);
-  }
-}
-
 class IconButtonWidget extends StatelessWidget {
   final Map<String, dynamic> map;
 
@@ -609,10 +498,14 @@ class IconButtonWidget extends StatelessWidget {
     } else {
       w = getPatternWidget(icv);
     }
+    dynamic p = map["_padding"] ?? const EdgeInsets.all(8.0);
+    if (p is double) {
+      p = EdgeInsets.all(p);
+    }
     //Icon ic = w! as Icon;
     return IconButton(
       icon: w!,
-      padding: map["_padding"] ?? const EdgeInsets.all(8.0),
+      padding: p,
       onPressed: () => _onTap(context, map),
     );
   }
@@ -688,10 +581,14 @@ class VisiblePattern extends ProcessPattern {
   VisiblePattern(Map<String, dynamic> map) : super(map);
   @override
   Widget getWidget({String? name}) {
-    return Visibility(
-      child: getPatternWidget(map["_child"])!,
-      visible: map["_visible"],
-    );
+    String rxName = map["_valueName"];
+    return Obx(() {
+      bool _value = resxController.getRxValue(rxName);
+      return Visibility(
+        child: getPatternWidget(map["_child"])!,
+        visible: _value,
+      );
+    });
   }
 }
 
@@ -699,14 +596,20 @@ class ObxPattern extends ProcessPattern {
   ObxPattern(Map<String, dynamic> map) : super(map);
   @override
   Widget getWidget({String? name}) {
-    ProcessPattern child = map["_child"];
+    ProcessPattern? child = map["_child"];
     return Obx(() {
       String rxName = map["_valueName"];
       dynamic value = resxController.getRxValue(rxName);
       String key = map["_valueKey"] ??
           ((value is List<dynamic>) ? "_children" : "_child");
-      child.map[key] = value;
-      return getPatternWidget(child)!;
+      if (child != null) {
+        child.map[key] = value;
+        return getPatternWidget(child)!;
+      }
+      if (value is ProcessPattern) {
+        return getPatternWidget(value)!;
+      }
+      return value;
     });
   }
 }
@@ -799,7 +702,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   late Map<String, dynamic> map;
   late Map<String, dynamic> dmap;
   RefreshController rc = RefreshController();
-  late List<dynamic> itemRef;
+  List<dynamic>? itemRef;
   ScrollController sc = ScrollController();
 
   @override
@@ -819,9 +722,11 @@ class _PagingWidgetState extends State<PagingWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (map != widget.map) {
+    if ((map != widget.map) || (itemRef == null)) {
       map = widget.map;
       dmap = map["_dataCache"];
+      dmap["_dataCompleted"] = false;
+      dmap["_pInx"] = null;
       _nextPage(dmap);
     }
     return SmartRefresher(
@@ -909,6 +814,42 @@ class _PagingWidgetState extends State<PagingWidget> {
         children: _getExpandableChildren(itemRef),
       );
     }
+    if (map["_quilted"] != null) {
+      return GridView.custom(
+        controller: sc,
+        scrollDirection: map["_direction"] ?? Axis.vertical,
+        padding: map["_padding"],
+        shrinkWrap: map["_shrinkWrap"] ?? true,
+        physics: map["_physics"],
+        gridDelegate: SliverQuiltedGridDelegate(
+          crossAxisCount: 4,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
+          repeatPattern: QuiltedGridRepeatPattern.inverted,
+          pattern: const [
+            QuiltedGridTile(3, 2),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(3, 2),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+            QuiltedGridTile(1, 1),
+          ],
+        ),
+        childrenDelegate: SliverChildBuilderDelegate(
+            (context, index) => _itemBuilder(itemRef[index], index),
+            childCount: itemRef.length),
+      );
+    }
     return ListView.builder(
       controller: sc,
       scrollDirection: map["_direction"] ?? Axis.vertical,
@@ -941,6 +882,9 @@ class _PagingWidgetState extends State<PagingWidget> {
     if (cmap != null) {
       lmap.addAll(cmap);
     }
+    Map<String, dynamic> inMap = {};
+    inMap.addAll(lmap);
+    lmap["_inMap"] = inMap;
     ProcessEvent? tevent = map["_onTap"];
     if (tevent != null) {
       lmap["_onTap"] = tevent;
@@ -992,7 +936,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     m["_pInx"] = inx;
     itemRef = [];
     for (int i = 0; i < len; i++) {
-      itemRef.add(pList[i + inx]);
+      itemRef!.add(pList[i + inx]);
     }
     if (pList.length <= (inx + plen)) {
       m["_dataCompleted"] = true;
@@ -1012,7 +956,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     int len = (pList.length > plen) ? plen : pList.length;
     itemRef = [];
     for (int i = 0; i < len; i++) {
-      itemRef.add(pList[i + inx]);
+      itemRef!.add(pList[i + inx]);
     }
     m["_pInx"] = inx;
     if (pList.length > plen) {
@@ -1064,7 +1008,6 @@ class _DropdownButtonWidgetState extends State<DropdownButtonWidget> {
     _icon = map["_icon"] ?? const Icon(Icons.arrow_drop_down);
     _iconSize = map["_iconSize"] ?? 24.0;
     _style = map["_textStyle"];
-    _inMap = map["_inMap"];
     super.initState();
   }
 
@@ -1119,10 +1062,12 @@ class _DropdownButtonWidgetState extends State<DropdownButtonWidget> {
     if (rxName != null) {
       resxController.setRxValue(rxName, newValue);
     }
+    Map<String, dynamic> m = map["_inMap"] ?? {};
+    m['_value'] = newValue;
     if (fsmName != null) {
-      Map<String, dynamic> m = _inMap ?? {};
-      m['_value'] = newValue;
       model.appActions.doFunction("fsmEvent", fsmName, m);
+    } else {
+      processValue(map, newValue);
     }
   }
 }
@@ -1204,6 +1149,7 @@ class ListTileWidget extends StatelessWidget {
       hoverColor: map["_hoverColor"],
       autofocus: map["_autofocus"] ?? false,
       onLongPress: map["_onLongPress"],
+      minLeadingWidth: map["_leadingWidth"],
       onTap: () => _onTap(context, map),
     );
   }
@@ -1622,6 +1568,8 @@ class TextIconListPattern extends ProcessPattern {
           children.add(div);
           d = 0;
         }
+      } else if (a is ProcessPattern) {
+        children.add(a.getWidget());
       } else {
         Map<String, dynamic>? ma = (a is Map<String, dynamic>) ? a : null;
         String? name = (ma != null) ? ma["_attr"] : a;
@@ -1721,11 +1669,66 @@ getAttrMap(String name, Map<String, dynamic> me, Map<String, dynamic> entity,
   });
 }
 
+class CupertinoSwitchWidget extends StatefulWidget {
+  final Map<String, dynamic> map;
+  const CupertinoSwitchWidget(this.map, {Key? key}) : super(key: key);
+
+  @override
+  _CupertinoSwitchWidgetState createState() => _CupertinoSwitchWidgetState();
+}
+
+class _CupertinoSwitchWidgetState extends State<CupertinoSwitchWidget> {
+  late bool s;
+  late Map<String, dynamic> map;
+  dynamic tColor;
+  dynamic aColor;
+  String? event;
+
+  @override
+  void initState() {
+    map = widget.map;
+    s = map["_switch"] ?? false;
+    tColor = map["_trackColor"];
+    if (tColor is String) {
+      tColor = colorMap[tColor];
+    }
+    tColor ??= Colors.grey;
+    aColor = map["_activeColor"];
+    if (aColor is String) {
+      aColor = colorMap[aColor];
+    }
+    aColor ??= Colors.blue;
+    event = map["_processEvent"];
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoSwitch(
+        trackColor: tColor,
+        activeColor: aColor,
+        value: s,
+        onChanged: (newValue) {
+          setState(() {
+            s = newValue;
+          });
+          if (event != null) {
+            Map<String, dynamic> m = map["_inMap"] ?? {};
+            m["_switch"] = newValue;
+            ProcessEvent pe = ProcessEvent(event!, map: m);
+            Agent a = model.appActions.getAgent("pattern");
+            a.process(pe);
+          }
+        });
+  }
+}
+
 class CupertinoSwitchPattern extends ProcessPattern {
+  late String rxName;
   CupertinoSwitchPattern(Map<String, dynamic> map) : super(map);
   @override
   Widget getWidget({String? name}) {
-    bool s = map["_switch"];
+    rxName = map["_rxName"];
     dynamic tColor = map["_trackColor"];
     if (tColor is String) {
       tColor = colorMap[tColor];
@@ -1736,13 +1739,210 @@ class CupertinoSwitchPattern extends ProcessPattern {
       aColor = colorMap[aColor];
     }
     aColor ??= Colors.blue;
-    return CupertinoSwitch(
-        trackColor: tColor,
-        activeColor: aColor,
-        value: s,
-        onChanged: (newValue) {
-          map["_switch"] = newValue;
-          _onTap(null, map);
-        });
+    String? event = map["_processEvent"];
+    return Obx(() {
+      return CupertinoSwitch(
+          trackColor: tColor,
+          activeColor: aColor,
+          value: resxController.getRxValue(rxName),
+          onChanged: (newValue) {
+            resxController.setRxValue(rxName, newValue);
+            if (event != null) {
+              Map<String, dynamic> m = map["_inMap"] ?? {};
+              m["_switch"] = newValue;
+              ProcessEvent pe = ProcessEvent(event, map: m);
+              Agent a = model.appActions.getAgent("pattern");
+              a.process(pe);
+            }
+          });
+    });
   }
 }
+
+class ObxDropdownPattern extends ProcessPattern {
+  late String rxName;
+  ObxDropdownPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    rxName = map["_rxName"];
+    String type = map["_type"] ?? "string";
+    List<dynamic> _items = map["_items"];
+    dynamic _hint = map["_hint"];
+    dynamic _icon = map["_icon"] ?? const Icon(Icons.arrow_drop_down);
+    dynamic _iconSize = map["_iconSize"] ?? 24.0;
+    dynamic _style = map["_textStyle"];
+    return Obx(() {
+      dynamic _value = resxController.getRxValue(rxName);
+      if (_value == 'Ø') {
+        _value = null;
+      }
+      if (type == "string") {
+        return DropdownButton<String>(
+          items: _items.map((e) {
+            return DropdownMenuItem<String>(value: e, child: Text(e));
+          }).toList(),
+          value: _value,
+          onChanged: (newValue) => processValue(map, newValue),
+          hint: (_hint != null)
+              ? Text(
+                  _hint,
+                  style: _style,
+                )
+              : null,
+          style: _style,
+          icon: _icon,
+          iconSize: _iconSize,
+        );
+      }
+      return DropdownButton<Widget>(
+        items: _items.map((e) {
+          return DropdownMenuItem<Widget>(
+            value: e,
+            child: e,
+          );
+        }).toList(),
+        value: _value,
+        onChanged: (newValue) => processValue(map, newValue),
+        hint: (_hint != null)
+            ? Text(
+                _hint,
+                style: _style,
+              )
+            : null,
+        style: _style,
+        icon: _icon,
+        iconSize: _iconSize,
+      );
+    });
+  }
+}
+
+class ElevatedButtonPattern extends ProcessPattern {
+  late String rxName;
+  ElevatedButtonPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    Widget? w = getPatternWidget(map["_child"]);
+    return ElevatedButton(
+      child: w,
+      onPressed: tapAction(map),
+    );
+  }
+}
+
+class QRCodeGenPattern extends ProcessPattern {
+  QRCodeGenPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    String? text = map["_text"];
+    if ((text == null) || (text.isEmpty)) {
+      return const Text("No input");
+    }
+    Color c = getColor(map["_color"]) ?? Colors.black;
+    return BarcodeWidget(
+      data: text,
+      barcode: Barcode.qrCode(),
+      width: map["_width"] ?? 100.0,
+      height: map["_height"] ?? 100.0,
+      color: c,
+    );
+  }
+}
+
+class CheckBoxWidget extends StatefulWidget {
+  final Map<String, dynamic> map;
+  const CheckBoxWidget(this.map, {Key? key}) : super(key: key);
+
+  @override
+  _CheckBoxWidget createState() => _CheckBoxWidget();
+}
+
+class _CheckBoxWidget extends State<CheckBoxWidget> {
+  late Map<String, dynamic> map;
+  Color? fc;
+  Color? ac;
+  Color? cc;
+  MaterialStateProperty<Color>? mfc;
+  late dynamic isChecked;
+
+  @override
+  void initState() {
+    map = widget.map;
+    super.initState();
+    ac = getColor(map["_activeColor"]);
+    cc = getColor(map["_checkColor"]);
+    fc = getColor(map["_fillColor"]);
+    mfc = (fc != null) ? MaterialStateProperty.resolveWith(getFillColor) : null;
+    isChecked = map["_value"] ?? false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Checkbox(
+      value: (isChecked is bool)
+          ? isChecked
+          : ((isChecked is String) ? (isChecked == '1') : (isChecked == 1)),
+      onChanged: ((value) {
+        if (value != null) {
+          dynamic v = (isChecked is bool)
+              ? value
+              : ((isChecked is String)
+                  ? ((value) ? '1' : '0')
+                  : ((value) ? 1 : 0));
+          setState(() {
+            isChecked = v;
+          });
+          processValue(map, v);
+        }
+      }),
+      activeColor: ac,
+      checkColor: cc,
+      fillColor: mfc,
+      shape: map["_shape"],
+      side: map["_side"],
+    );
+  }
+
+  Color getFillColor(Set<MaterialState> states) {
+    const Set<MaterialState> interactiveStates = <MaterialState>{
+      MaterialState.pressed,
+      MaterialState.hovered,
+      MaterialState.focused,
+    };
+    Color? ac = getColor(map["_actionColor"]);
+    if ((ac != null) && states.any(interactiveStates.contains)) {
+      return ac;
+    }
+    return fc!;
+  }
+}
+
+class CheckBoxPattern extends ProcessPattern {
+  CheckBoxPattern(Map<String, dynamic> map) : super(map);
+  @override
+  Widget getWidget({String? name}) {
+    return CheckBoxWidget(map);
+  }
+}
+
+/* class AnimatedListWidget extends StatefulWidget {
+  final Map<String, dynamic> map;
+  const AnimatedListWidget(this.map, {Key? key}) : super(key: key);
+
+  @override
+  _AnimatedListWidget createState() => _AnimatedListWidget();
+}
+
+class _AnimatedListWidget extends State<AnimatedListWidget> {
+  late Map<String, dynamic> map;
+final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();  
+
+  @override
+  Widget build(BuildContext context) {
+    _listKey.currentState.
+    return AnimatedList(
+      itemBuilder: (context, index, animation) =>
+          _itemBuilder(itemRef[index], index),
+    );
+  }
+} */

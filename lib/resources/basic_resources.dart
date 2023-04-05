@@ -55,6 +55,7 @@ Map<String, dynamic> resources = {
   "shadowDecoration": shadowDecoration,
   "bgDecoration": bgDecoration,
   "rCDecoration": rCDecoration,
+  "sizeScaffold": sizeScaffold,
 };
 
 final textFieldBorder = OutlineInputBorder(
@@ -217,3 +218,40 @@ ThemeData getMainTheme() => ThemeData(
 
 final RegExp pwre = RegExp(
     r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
+
+Color? getColor(dynamic c) {
+  if (c != null) {
+    if (c is Color) {
+      return c;
+    }
+    if (c is String) {
+      if (c.contains("0x")) {
+        int? cc = int.tryParse(c);
+        return (cc != null) ? Color(cc) : null;
+      }
+      return colorMap[c];
+    }
+  }
+  return null;
+}
+
+final Map<int, int> staggerTileMap = {
+  0: 1,
+  1: 2,
+  2: 1,
+  3: 1,
+  4: 1,
+  5: 1,
+  6: 1,
+  7: 1,
+  8: 1,
+  9: 2,
+  10: 1,
+  11: 1,
+  12: 1,
+  13: 1,
+  14: 1,
+  15: 1,
+  16: 1,
+  17: 1
+};
