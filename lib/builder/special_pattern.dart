@@ -245,7 +245,21 @@ class TapItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget? w = getPatternWidget(map["_child"]);
-    return GestureDetector(onTap: () => _onTap(context, map), child: w);
+    return GestureDetector(
+      onTap: () => _onTap(context, map),
+      child: w,
+      onLongPress: () {
+        dynamic onLongPress = map["_onLongPress"];
+        if (onLongPress == null) {
+          _onTap(context, map);
+        }
+        Map<String, dynamic> lMap = {
+          "_processEvent": onLongPress,
+          "_inMap": map["_inLongMap"]
+        };
+        processValue(lMap, null);
+      },
+    );
   }
 }
 
@@ -305,7 +319,7 @@ class BadgePattern extends ProcessPattern {
   @override
   Widget getWidget({String? name}) {
     Widget? w = getPatternWidget(map["_child"]);
-    Widget? bw = getPatternWidget(map["_badgeContext"]);
+    Widget? bw = getPatternWidget(map["_badgeContent"]);
     return Badge(
       badgeContent: bw,
       //badgeColor: map["_badgeColor"],

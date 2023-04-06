@@ -531,7 +531,7 @@ ProcessPattern getTapItemPattern(Map<String, dynamic> pmap) {
 
 ProcessPattern getBadgePattern(Map<String, dynamic> pmap) {
   Map<String, dynamic> map = {};
-  List<String> nl = ["_child", "_badgeContext", "_badgeColor", "_showBadge"];
+  List<String> nl = ["_child", "_badgeContent", "_badgeColor", "_showBadge"];
   for (String s in nl) {
     dynamic d = pmap[s];
     if (d != null) {
